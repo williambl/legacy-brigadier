@@ -1,7 +1,7 @@
 package com.williambl.legacybrigadier.mixin;
 
-import com.williambl.legacybrigadier.ChatScreenHooks;
-import com.williambl.legacybrigadier.LegacyBrigadierClient;
+import com.williambl.legacybrigadier.client.LegacyBrigadierClient;
+import com.williambl.legacybrigadier.client.mixinhooks.ChatScreenHooks;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.screen.ChatScreen;

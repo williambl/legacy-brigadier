@@ -1,6 +1,6 @@
-package com.williambl.legacybrigadier;
+package com.williambl.legacybrigadier.client;
 
-import com.williambl.legacybrigadier.network.LegacyBrigadierPluginChannelClient;
+import com.williambl.legacybrigadier.client.network.LegacyBrigadierPluginChannelClient;
 import io.github.minecraftcursedlegacy.api.networking.PluginChannelRegistry;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
@@ -17,8 +17,7 @@ public class LegacyBrigadierClient implements ClientModInitializer {
 
     static {
         try {
-        Field field = null;
-            field = Minecraft.class.getDeclaredField("instance");
+        Field field = Minecraft.class.getDeclaredField("instance");
         field.setAccessible(true);
         MINECRAFT = (Minecraft) field.get(null);
         } catch (NoSuchFieldException | IllegalAccessException e) {

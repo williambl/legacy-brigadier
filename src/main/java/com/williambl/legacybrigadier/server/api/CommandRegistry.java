@@ -1,13 +1,16 @@
-package com.williambl.legacybrigadier.api;
+package com.williambl.legacybrigadier.server.api;
 
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.tree.CommandNode;
-import com.williambl.legacybrigadier.LegacyBrigadierServer;
+import com.williambl.legacybrigadier.server.LegacyBrigadierServer;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.class_39;
 
 import java.util.HashMap;
 import java.util.Map;
 
+@Environment(EnvType.SERVER)
 public class CommandRegistry {
 
     private static Map<CommandNode<class_39>, String> helpMap = new HashMap<>();

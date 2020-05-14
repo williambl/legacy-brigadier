@@ -1,11 +1,12 @@
-package com.williambl.legacybrigadier;
+package com.williambl.legacybrigadier.server;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.ParseResults;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
-import com.williambl.legacybrigadier.api.CommandRegistry;
-import com.williambl.legacybrigadier.network.LegacyBrigadierPluginChannelServer;
+import com.williambl.legacybrigadier.server.api.CommandRegistry;
+import com.williambl.legacybrigadier.server.mixinhooks.CommandSourceHooks;
+import com.williambl.legacybrigadier.server.network.LegacyBrigadierPluginChannelServer;
 import io.github.minecraftcursedlegacy.api.networking.PluginChannelRegistry;
 import net.fabricmc.api.DedicatedServerModInitializer;
 import net.fabricmc.api.EnvType;

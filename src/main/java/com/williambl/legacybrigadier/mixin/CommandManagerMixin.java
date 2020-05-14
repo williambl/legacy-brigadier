@@ -1,8 +1,8 @@
 package com.williambl.legacybrigadier.mixin;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.williambl.legacybrigadier.LegacyBrigadierServer;
-import com.williambl.legacybrigadier.api.CommandRegistry;
+import com.williambl.legacybrigadier.server.LegacyBrigadierServer;
+import com.williambl.legacybrigadier.server.api.CommandRegistry;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.class_38;

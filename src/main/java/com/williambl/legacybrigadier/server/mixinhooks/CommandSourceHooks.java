@@ -1,4 +1,4 @@
-package com.williambl.legacybrigadier;
+package com.williambl.legacybrigadier.server.mixinhooks;
 
 import com.williambl.legacybrigadier.mixin.ServerPlayerPacketHandlerMixin;
 import net.fabricmc.api.EnvType;

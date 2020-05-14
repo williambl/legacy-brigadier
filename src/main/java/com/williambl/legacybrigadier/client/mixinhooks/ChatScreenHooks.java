@@ -1,4 +1,4 @@
-package com.williambl.legacybrigadier;
+package com.williambl.legacybrigadier.client.mixinhooks;
 
 public interface ChatScreenHooks {
     String getMessage();

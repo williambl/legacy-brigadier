@@ -1,9 +1,9 @@
-package com.williambl.legacybrigadier.network;
+package com.williambl.legacybrigadier.server.network;
 
 import com.mojang.brigadier.ParseResults;
 import com.mojang.brigadier.suggestion.Suggestions;
-import com.williambl.legacybrigadier.LegacyBrigadierServer;
 import com.williambl.legacybrigadier.mixin.ServerPlayerPacketHandlerMixin;
+import com.williambl.legacybrigadier.server.LegacyBrigadierServer;
 import io.github.minecraftcursedlegacy.api.networking.PluginChannel;
 import io.github.minecraftcursedlegacy.api.registry.Id;
 import net.fabricmc.api.EnvType;

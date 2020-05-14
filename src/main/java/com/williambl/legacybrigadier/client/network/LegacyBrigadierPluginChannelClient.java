@@ -1,7 +1,7 @@
-package com.williambl.legacybrigadier.network;
+package com.williambl.legacybrigadier.client.network;
 
-import com.williambl.legacybrigadier.ChatScreenHooks;
-import com.williambl.legacybrigadier.LegacyBrigadierClient;
+import com.williambl.legacybrigadier.client.LegacyBrigadierClient;
+import com.williambl.legacybrigadier.client.mixinhooks.ChatScreenHooks;
 import io.github.minecraftcursedlegacy.api.networking.PluginChannel;
 import io.github.minecraftcursedlegacy.api.registry.Id;
 import net.fabricmc.api.EnvType;
