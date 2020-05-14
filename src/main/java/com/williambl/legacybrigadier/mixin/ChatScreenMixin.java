@@ -23,10 +23,39 @@ public abstract class ChatScreenMixin implements ChatScreenHooks {
     @Accessor("field_786")
     public abstract void setMessage(String newMessage);
 
+    private int currentMessageIndex = -1;
+    private String currentMessage = "";
+
     @Inject(method = "keyPressed(CI)V", at = @At("TAIL"))
-    void completeWithTab(char c, int i, CallbackInfo ci) {
-        if (i == Keyboard.KEY_TAB) {
-            LegacyBrigadierClient.CHANNEL.send(getMessage().replaceFirst("/", "").getBytes(StandardCharsets.UTF_8), LegacyBrigadierClient.MINECRAFT);
+    void checkKeys(char c, int i, CallbackInfo ci) {
+        switch (i) {
+
+            case Keyboard.KEY_TAB:
+                LegacyBrigadierClient.CHANNEL.send(getMessage().replaceFirst("/", "").getBytes(StandardCharsets.UTF_8), LegacyBrigadierClient.MINECRAFT);
+                break;
+
+            case Keyboard.KEY_UP:
+                if (LegacyBrigadierClient.previousMessages.size() > currentMessageIndex+1) {
+                    if (currentMessageIndex == -1)
+                        currentMessage = getMessage();
+                    setMessage(LegacyBrigadierClient.previousMessages.get(++currentMessageIndex));
+                }
+                break;
+
+            case Keyboard.KEY_DOWN:
+                if (currentMessageIndex == 0) {
+                    currentMessageIndex = -1;
+                    setMessage(currentMessage);
+                } else if (currentMessageIndex > 0) {
+                    setMessage(LegacyBrigadierClient.previousMessages.get(--currentMessageIndex));
+                }
+                break;
+
         }
+    }
+
+    @Inject(method = "keyPressed", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/AbstractClientPlayer;sendChatMessage(Ljava/lang/String;)V"))
+    void addMessageToQueue(char c, int i, CallbackInfo ci) {
+        LegacyBrigadierClient.previousMessages.add(getMessage().trim());
     }
 }

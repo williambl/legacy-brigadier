@@ -8,12 +8,15 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.List;
 
 @Environment(EnvType.CLIENT)
 public class LegacyBrigadierClient implements ClientModInitializer {
 
     public static final LegacyBrigadierPluginChannelClient CHANNEL = new LegacyBrigadierPluginChannelClient();
     public static Minecraft MINECRAFT;
+    public static List<String> previousMessages = new ArrayList<>();
 
     static {
         try {
