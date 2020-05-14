@@ -1,7 +1,7 @@
 package com.williambl.legacybrigadier.mixin;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.williambl.legacybrigadier.LegacyBrigadier;
+import com.williambl.legacybrigadier.LegacyBrigadierServer;
 import com.williambl.legacybrigadier.api.CommandRegistry;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -23,7 +23,7 @@ public class CommandManagerMixin {
     )
     void runCommandThroughBrigadier(class_38 commandInfo, CallbackInfo ci) {
         try {
-        LegacyBrigadier.dispatcher.execute(commandInfo.field_159, commandInfo.field_160);
+        LegacyBrigadierServer.dispatcher.execute(commandInfo.field_159, commandInfo.field_160);
         ci.cancel();
         } catch (CommandSyntaxException ignored) {}
     }
@@ -33,8 +33,8 @@ public class CommandManagerMixin {
             at = @At(value = "TAIL")
     )
     void appendBrigadierHelp(class_39 commandSource, CallbackInfo ci) {
-        LegacyBrigadier.dispatcher
-                .getSmartUsage(LegacyBrigadier.dispatcher.getRoot(), commandSource)
+        LegacyBrigadierServer.dispatcher
+                .getSmartUsage(LegacyBrigadierServer.dispatcher.getRoot(), commandSource)
                 .forEach((cmd, usage) -> commandSource.method_1409(
                         String.format("   %s                        %s", usage, CommandRegistry.getHelp(cmd))
                 ));

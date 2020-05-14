@@ -2,15 +2,12 @@ package com.williambl.legacybrigadier.api;
 
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.tree.CommandNode;
-import com.williambl.legacybrigadier.LegacyBrigadier;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import com.williambl.legacybrigadier.LegacyBrigadierServer;
 import net.minecraft.class_39;
 
 import java.util.HashMap;
 import java.util.Map;
 
-@Environment(EnvType.SERVER)
 public class CommandRegistry {
 
     private static Map<CommandNode<class_39>, String> helpMap = new HashMap<>();
@@ -22,7 +19,7 @@ public class CommandRegistry {
     }
 
     public static CommandNode<class_39> register(LiteralArgumentBuilder<class_39> command) {
-        return LegacyBrigadier.dispatcher.register(command);
+        return LegacyBrigadierServer.dispatcher.register(command);
     }
 
     public static String getHelp(CommandNode<class_39> command) {

@@ -3,13 +3,14 @@
   "package": "com.williambl.legacybrigadier.mixin",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
-    "CommandSourceMixin",
-    "ServerPlayerPacketHandlerMixin"
   ],
   "client": [
+    "ChatScreenMixin"
   ],
   "server": [
-    "CommandManagerMixin"
+    "CommandManagerMixin",
+    "CommandSourceMixin",
+    "ServerPlayerPacketHandlerMixin"
   ],
   "injectors": {
     "defaultRequire": 1

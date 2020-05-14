@@ -1,25 +1,47 @@
 package com.williambl.legacybrigadier;
 
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.ParseResults;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.williambl.legacybrigadier.api.CommandRegistry;
+import com.williambl.legacybrigadier.network.LegacyBrigadierPluginChannelServer;
+import io.github.minecraftcursedlegacy.api.networking.PluginChannelRegistry;
 import net.fabricmc.api.DedicatedServerModInitializer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.class_39;
 
+import java.util.concurrent.ExecutionException;
+
 import static com.mojang.brigadier.arguments.IntegerArgumentType.getInteger;
 import static com.mojang.brigadier.arguments.IntegerArgumentType.integer;
 
 @Environment(EnvType.SERVER)
-public class LegacyBrigadier implements DedicatedServerModInitializer {
+public class LegacyBrigadierServer implements DedicatedServerModInitializer {
 
 	public static CommandDispatcher<class_39> dispatcher = new CommandDispatcher<>();
 
+	public static final LegacyBrigadierPluginChannelServer CHANNEL = new LegacyBrigadierPluginChannelServer();
 
 	@Override
 	public void onInitializeServer() {
+
+		PluginChannelRegistry.registerPluginChannel(CHANNEL);
+
+		CommandRegistry.register(
+				LiteralArgumentBuilder.<class_39>literal("suggestsettile")
+				.executes(context -> {
+					ParseResults<class_39> parseResults = LegacyBrigadierServer.dispatcher.parse("setti", context.getSource());
+					try {
+						context.getSource().method_1409(LegacyBrigadierServer.dispatcher.getCompletionSuggestions(parseResults).get().toString());
+					} catch (InterruptedException | ExecutionException e) {
+						e.printStackTrace();
+					}
+					return 1;
+				})
+		);
+
 		CommandRegistry.register(
 				LiteralArgumentBuilder.<class_39>literal("foo")
 						.then(
