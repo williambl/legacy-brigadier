@@ -1,29 +1,29 @@
 {
   "schemaVersion": 1,
-  "id": "modid",
+  "id": "legacybrigadier",
   "version": "${version}",
 
-  "name": "Example Mod",
-  "description": "This is an example description! Tell everyone what your mod is about!",
+  "name": "Legacy Brigadier",
+  "description": "aa",
   "authors": [
-    "Me!"
+    "Will BL"
   ],
   "contact": {
-    "issues": "https://github.com/minecraft-cursed-legacy/Example-Mod/issues",
-    "sources": "https://github.com/minecraft-cursed-legacy/Example-Mod"
+    "issues": "https://github.com/williambl/legacy-brigadier/issues",
+    "sources": "https://github.com/williambl/legacy-brigadier"
   },
 
-  "license": "CC0-1.0",
-  "icon": "assets/modid/icon.png",
+  "license": "MIT",
+  "icon": "assets/legacybrigadier/icon.png",
 
   "environment": "*",
   "entrypoints": {
-    "init": [
-      "io.github.minecraftcursedlegacy.example.ExampleMod"
+    "server": [
+      "com.williambl.legacybrigadier.LegacyBrigadier"
     ]
   },
   "mixins": [
-    "modid.mixins.json"
+    "legacybrigadier.mixins.json"
   ],
 
   "depends": {
