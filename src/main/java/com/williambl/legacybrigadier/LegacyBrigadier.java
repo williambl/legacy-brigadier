@@ -3,6 +3,7 @@ package com.williambl.legacybrigadier;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
+import com.williambl.legacybrigadier.api.CommandRegistry;
 import net.fabricmc.api.DedicatedServerModInitializer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -18,10 +19,7 @@ public class LegacyBrigadier implements DedicatedServerModInitializer {
 
 	@Override
 	public void onInitializeServer() {
-		// This code runs as soon as Minecraft is in a mod-load-ready state.
-		// However, some things (like resources) may still be uninitialized.
-		// Proceed with mild caution.
-		dispatcher.register(
+		CommandRegistry.register(
 				LiteralArgumentBuilder.<class_39>literal("foo")
 						.then(
 								RequiredArgumentBuilder.<class_39, Integer>argument("bar", integer())
