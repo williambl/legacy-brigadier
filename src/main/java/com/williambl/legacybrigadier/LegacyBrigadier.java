@@ -17,6 +17,7 @@ public class LegacyBrigadier implements DedicatedServerModInitializer {
 
 	public static CommandDispatcher<class_39> dispatcher = new CommandDispatcher<>();
 
+
 	@Override
 	public void onInitializeServer() {
 		CommandRegistry.register(
@@ -31,7 +32,8 @@ public class LegacyBrigadier implements DedicatedServerModInitializer {
 						.executes(c -> {
 							c.getSource().method_1409("Called foo with no arguments");
 							return 1;
-						})
+						}),
+				"Foos a bar"
 		);
 	}
 }

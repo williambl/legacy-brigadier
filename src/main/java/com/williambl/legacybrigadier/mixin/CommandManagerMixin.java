@@ -2,6 +2,7 @@ package com.williambl.legacybrigadier.mixin;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.williambl.legacybrigadier.LegacyBrigadier;
+import com.williambl.legacybrigadier.api.CommandRegistry;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.class_38;
@@ -32,8 +33,10 @@ public class CommandManagerMixin {
             at = @At(value = "TAIL")
     )
     void appendBrigadierHelp(class_39 commandSource, CallbackInfo ci) {
-        LegacyBrigadier.dispatcher.getSmartUsage(LegacyBrigadier.dispatcher.getRoot(), commandSource).forEach((cmd, usage) -> {
-            commandSource.method_1409(String.format("   %s                        brigadier command", usage));
-                });
+        LegacyBrigadier.dispatcher
+                .getSmartUsage(LegacyBrigadier.dispatcher.getRoot(), commandSource)
+                .forEach((cmd, usage) -> commandSource.method_1409(
+                        String.format("   %s                        %s", usage, CommandRegistry.getHelp(cmd))
+                ));
     }
 }
