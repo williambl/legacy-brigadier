@@ -35,5 +35,32 @@ public class LegacyBrigadier implements DedicatedServerModInitializer {
 						}),
 				"Foos a bar"
 		);
+		CommandRegistry.register(
+				LiteralArgumentBuilder.<class_39>literal("settile")
+				.then(
+						RequiredArgumentBuilder.<class_39, Integer>argument("x", integer())
+								.then(
+										RequiredArgumentBuilder.<class_39, Integer>argument("y", integer())
+												.then(
+														RequiredArgumentBuilder.<class_39, Integer>argument("z", integer())
+																.then(
+																		RequiredArgumentBuilder.<class_39, Integer>argument("id", integer())
+																				.executes(context -> {
+																					((CommandSourceHooks) context.getSource()).getWorld().setTile(getInteger(context, "x"), getInteger(context, "y"), getInteger(context, "z"), getInteger(context, "id"));
+																					return 0;
+																				})
+																		.then(
+																				RequiredArgumentBuilder.<class_39, Integer>argument("meta", integer())
+																				.executes(context -> {
+																					((CommandSourceHooks) context.getSource()).getWorld().method_201(getInteger(context, "x"), getInteger(context, "y"), getInteger(context, "z"), getInteger(context, "id"), getInteger(context, "meta"));
+																					return 0;
+																				})
+																		)
+																)
+												)
+								)
+				),
+				"Set a tile"
+		);
 	}
 }
