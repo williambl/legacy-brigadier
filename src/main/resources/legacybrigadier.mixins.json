@@ -3,6 +3,8 @@
   "package": "com.williambl.legacybrigadier.mixin",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
+    "CommandSourceMixin",
+    "ServerPlayerPacketHandlerMixin"
   ],
   "client": [
   ],
