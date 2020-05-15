@@ -23,7 +23,6 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityRegistry;
 import net.minecraft.level.Level;
 import net.minecraft.packet.play.SendChatMessageC2S;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.Vec3i;
 
 import java.io.File;
@@ -244,6 +243,27 @@ public class LegacyBrigadierServer implements DedicatedServerModInitializer {
 										)
 						),
 				"Whisper something to a player"
+		);
+
+		CommandRegistry.register(
+				LiteralArgumentBuilder.<class_39>literal("time")
+				.requires(permission("command.time"))
+				.then(
+						LiteralArgumentBuilder.<class_39>literal("set")
+						.then(RequiredArgumentBuilder.<class_39, Integer>argument("time", integer(0))
+						.executes(context -> {
+							((CommandSourceHooks)context.getSource()).getWorld().setLevelTime(getInteger(context, "time"));
+							return 0;
+						}))
+				)
+				.then(
+						LiteralArgumentBuilder.<class_39>literal("get")
+						.executes(context -> {
+							context.getSource().method_1409(Long.toString(((CommandSourceHooks)context.getSource()).getWorld().getLevelTime()));
+							return 0;
+						})
+				),
+				"Set or get the time"
 		);
 	}
 }
