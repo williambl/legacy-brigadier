@@ -16,11 +16,11 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-public class TileIdArgumentType implements ArgumentType<Integer> {
+public class TileIdArgumentType implements ArgumentType<TileId> {
 
     private static final Collection<String> EXAMPLES = Arrays.asList("0", "2", "32");
 
-    private static final SimpleCommandExceptionType NOT_VALID_ID = new SimpleCommandExceptionType(new LiteralMessage("Not valid Tile ID!"));
+    private static final SimpleCommandExceptionType NOT_VALID_ID = new SimpleCommandExceptionType(new LiteralMessage("Invalid Tile ID"));
 
     private static String[] validStringValues;
     private static List<Integer> validValues;
@@ -47,23 +47,31 @@ public class TileIdArgumentType implements ArgumentType<Integer> {
         return validValues;
     }
 
+    private boolean isValueValid(int value) {
+        for (Integer validValue : getValidValues()) {
+            if (validValue == value)
+                return true;
+        }
+        return false;
+    }
+
     public static TileIdArgumentType tileId() {
         return new TileIdArgumentType();
     }
 
-    public static int getTileId(final CommandContext<?> context, final String name) {
-        return context.getArgument(name, Integer.class);
+    public static TileId getTileId(final CommandContext<?> context, final String name) {
+        return context.getArgument(name, TileId.class);
     }
 
     @Override
-    public Integer parse(StringReader reader) throws CommandSyntaxException {
+    public TileId parse(StringReader reader) throws CommandSyntaxException {
         int cursor = reader.getCursor();
         int id = reader.readInt();
-        if (!getValidValues().contains(id)) {
+        if (!isValueValid(id)) {
             reader.setCursor(cursor);
             throw NOT_VALID_ID.createWithContext(reader);
         }
-        return reader.readInt();
+        return new TileId(id);
     }
 
     @Override
