@@ -59,12 +59,7 @@ public interface CommandSourceHooks {
         return list;
     }
 
-    default boolean matchesNode(PermissionNode nodeToCheck) {
-        List<PermissionNode> perms = getPermissions();
-        for (PermissionNode perm : perms) {
-            if (perm.matches(nodeToCheck))
-                return true;
-        }
-        return false;
+    default boolean satisfiesNode(PermissionNode nodeToCheck) {
+        return nodeToCheck.isSatisfiedBy(getPermissions());
     }
 }

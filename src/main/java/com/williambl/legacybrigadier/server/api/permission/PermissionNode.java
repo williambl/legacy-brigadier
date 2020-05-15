@@ -1,5 +1,7 @@
 package com.williambl.legacybrigadier.server.api.permission;
 
+import java.util.List;
+
 public class PermissionNode {
 
     private final String path;
@@ -12,20 +14,28 @@ public class PermissionNode {
         return path;
     }
 
-    public boolean matches(PermissionNode nodeToCheck) {
+    public boolean satisfies(PermissionNode nodeToCheck) {
         String[] pathElements = getPath().split(".");
         String[] checkPathElements = nodeToCheck.getPath().split(".");
 
         for (int i = 0; i < checkPathElements.length; i++) {
             String node1 = i < pathElements.length ? pathElements[i] : "*";
             String node2 = checkPathElements[i];
-            if (!nodesMatch(node1, node2))
+            if (!nodeSatisfiesNode(node1, node2))
                 return false;
         }
         return true;
     }
 
-    private static boolean nodesMatch(String node1, String node2) {
+    public boolean isSatisfiedBy(List<PermissionNode> nodesToCheck) {
+        for (PermissionNode nodeToCheck : nodesToCheck) {
+            if (nodeToCheck.satisfies(this))
+                return true;
+        }
+        return false;
+    }
+
+    private static boolean nodeSatisfiesNode(String node1, String node2) {
         if (node1.equals("*"))
             return true;
         return node1.equals(node2);

@@ -22,6 +22,6 @@ public class RequiresPermission implements Predicate<class_39> {
 
     @Override
     public boolean test(class_39 commandSource) {
-        return ((CommandSourceHooks)commandSource).matchesNode(node);
+        return ((CommandSourceHooks)commandSource).satisfiesNode(node);
     }
 }

@@ -129,6 +129,7 @@ public class LegacyBrigadierServer implements DedicatedServerModInitializer {
 
 		CommandRegistry.register(
 				LiteralArgumentBuilder.<class_39>literal("summon")
+						.requires(permission("command.summon"))
 						.then(
 								RequiredArgumentBuilder.<class_39, EntityId>argument("id", entityId())
 										.then(
@@ -148,6 +149,7 @@ public class LegacyBrigadierServer implements DedicatedServerModInitializer {
 
 		CommandRegistry.register(
 				LiteralArgumentBuilder.<class_39>literal("help")
+						.requires(permission("command.help"))
 						.executes(context -> {
 									LegacyBrigadierServer.dispatcher
 											.getSmartUsage(LegacyBrigadierServer.dispatcher.getRoot(), context.getSource())
@@ -162,6 +164,7 @@ public class LegacyBrigadierServer implements DedicatedServerModInitializer {
 
 		CommandRegistry.register(
 				LiteralArgumentBuilder.<class_39>literal("me")
+						.requires(permission("command.me"))
 						.then(
 								RequiredArgumentBuilder.<class_39, String>argument("message", greedyString())
 										.executes(context -> {
@@ -176,6 +179,7 @@ public class LegacyBrigadierServer implements DedicatedServerModInitializer {
 
 		CommandRegistry.register(
 				LiteralArgumentBuilder.<class_39>literal("msg")
+						.requires(permission("command.msg"))
 						.then(
 								RequiredArgumentBuilder.<class_39, PlayerSelector>argument("player", player())
 										.then(
@@ -195,6 +199,7 @@ public class LegacyBrigadierServer implements DedicatedServerModInitializer {
 
 		CommandRegistry.register(
 				LiteralArgumentBuilder.<class_39>literal("give")
+						.requires(permission("command.give"))
 						.then(
 								RequiredArgumentBuilder.<class_39, PlayerSelector>argument("player", player())
 										.then(
