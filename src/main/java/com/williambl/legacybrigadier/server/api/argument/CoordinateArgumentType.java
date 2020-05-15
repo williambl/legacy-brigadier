@@ -20,7 +20,7 @@ import java.util.concurrent.CompletableFuture;
 @Environment(EnvType.SERVER)
 public class CoordinateArgumentType implements ArgumentType<Vec3i> {
     private static final Collection<String> EXAMPLES = Arrays.asList("0 0 0", "1 2 3");
-    public static final SimpleCommandExceptionType INCOMPLETE_EXCEPTION = new SimpleCommandExceptionType(new LiteralMessage("Incomplete"));
+    public static final SimpleCommandExceptionType INCOMPLETE_EXCEPTION = new SimpleCommandExceptionType(new LiteralMessage("Incomplete position"));
 
     public CoordinateArgumentType() {
     }

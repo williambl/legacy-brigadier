@@ -25,7 +25,9 @@ public class CommandManagerMixin {
         try {
         LegacyBrigadierServer.dispatcher.execute(commandInfo.field_159, commandInfo.field_160);
         ci.cancel();
-        } catch (CommandSyntaxException ignored) {}
+        } catch (CommandSyntaxException e) {
+            commandInfo.field_160.method_1409(e.getMessage());
+        }
     }
 
     @Inject(
