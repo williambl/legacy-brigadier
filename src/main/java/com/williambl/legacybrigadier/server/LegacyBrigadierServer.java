@@ -1,11 +1,15 @@
 package com.williambl.legacybrigadier.server;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.williambl.legacybrigadier.server.api.CommandRegistry;
 import com.williambl.legacybrigadier.server.api.argument.EntityId;
 import com.williambl.legacybrigadier.server.api.argument.TileId;
+import com.williambl.legacybrigadier.server.api.permission.PermissionNode;
 import com.williambl.legacybrigadier.server.mixinhooks.CommandSourceHooks;
 import com.williambl.legacybrigadier.server.network.LegacyBrigadierPluginChannelServer;
 import io.github.minecraftcursedlegacy.api.networking.PluginChannelRegistry;
@@ -18,7 +22,15 @@ import net.minecraft.entity.EntityRegistry;
 import net.minecraft.level.Level;
 import net.minecraft.util.Vec3i;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.lang.reflect.Field;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import static com.mojang.brigadier.arguments.IntegerArgumentType.getInteger;
 import static com.mojang.brigadier.arguments.IntegerArgumentType.integer;
@@ -28,6 +40,7 @@ import static com.williambl.legacybrigadier.server.api.argument.EntityIdArgument
 import static com.williambl.legacybrigadier.server.api.argument.EntityIdArgumentType.getEntityId;
 import static com.williambl.legacybrigadier.server.api.argument.TileIdArgumentType.getTileId;
 import static com.williambl.legacybrigadier.server.api.argument.TileIdArgumentType.tileId;
+import static com.williambl.legacybrigadier.server.api.permission.RequiresPermission.permission;
 
 @Environment(EnvType.SERVER)
 public class LegacyBrigadierServer implements DedicatedServerModInitializer {
@@ -36,8 +49,32 @@ public class LegacyBrigadierServer implements DedicatedServerModInitializer {
 
 	public static final LegacyBrigadierPluginChannelServer CHANNEL = new LegacyBrigadierPluginChannelServer();
 
-	public static Field ENTITY_MAP;
+	private static Gson GSON = new GsonBuilder().create();
+	public static Map<String, List<PermissionNode>> permissionsMap = new HashMap<>();
+	static {
+		File permissionsFile = new File("config/legacybrigadier/permissions.json");
+		try {
+			TypeToken<Map<String, List<String>>> typeToken = new TypeToken<Map<String, List<String>>>() {};
+			Map<String, List<String>> map = GSON.fromJson(new FileReader(permissionsFile), typeToken.getType());
 
+			map.forEach((player, perms) ->
+					permissionsMap.put(player, perms.stream().map(PermissionNode::new).collect(Collectors.toList()))
+			);
+		} catch (FileNotFoundException e) {
+			try {
+				if (permissionsFile.createNewFile()) {
+					System.out.println("Created perms file.");
+				} else {
+					System.out.println("Couldn't create perms file!");
+				}
+			} catch (IOException ex) {
+				ex.printStackTrace();
+			}
+			e.printStackTrace();
+		}
+	}
+
+	public static Field ENTITY_MAP;
 	static {
 		try {
 			ENTITY_MAP = EntityRegistry.class.getDeclaredField("STRING_ID_TO_CLASS");
@@ -55,6 +92,7 @@ public class LegacyBrigadierServer implements DedicatedServerModInitializer {
 
 		CommandRegistry.register(
 				LiteralArgumentBuilder.<class_39>literal("settile")
+						.requires(permission("command.settile"))
 						.then(
 								RequiredArgumentBuilder.<class_39, Vec3i>argument("pos", coordinate())
 										.then(
