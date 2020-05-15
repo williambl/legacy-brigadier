@@ -32,4 +32,5 @@ public class PermissionNode {
     }
 
     public static final PermissionNode ROOT = new PermissionNode("*");
+    public static final PermissionNode OPERATOR = new PermissionNode("minecraft.operator");
 }

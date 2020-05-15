@@ -133,5 +133,19 @@ public class LegacyBrigadierServer implements DedicatedServerModInitializer {
 						),
 				"Spawn an entity"
 		);
+
+		CommandRegistry.register(
+				LiteralArgumentBuilder.<class_39>literal("help")
+				.executes(context -> {
+					LegacyBrigadierServer.dispatcher
+									.getSmartUsage(LegacyBrigadierServer.dispatcher.getRoot(), context.getSource())
+									.forEach((cmd, usage) -> context.getSource().method_1409(
+											String.format("   %s                        %s", usage, CommandRegistry.getHelp(cmd))
+									));
+							return 0;
+						}
+				),
+				"Show help"
+		);
 	}
 }

@@ -1,6 +1,5 @@
 package com.williambl.legacybrigadier.server.mixinhooks;
 
-import com.williambl.legacybrigadier.mixin.ServerPlayerPacketHandlerMixin;
 import com.williambl.legacybrigadier.server.LegacyBrigadierServer;
 import com.williambl.legacybrigadier.server.api.permission.PermissionNode;
 import net.fabricmc.api.EnvType;
@@ -19,13 +18,13 @@ import java.util.List;
 public interface CommandSourceHooks {
     default Level getWorld() {
         if (this instanceof class_11)
-            return ((ServerPlayerPacketHandlerMixin)this).getPlayer().level;
+            return ((ServerPlayerPacketHandlerHooks)this).getPlayer().level;
         return null;
     }
 
     default Vec3i getPosition() {
         if (this instanceof class_11) {
-            ServerPlayer serverPlayer = ((ServerPlayerPacketHandlerMixin)this).getPlayer();
+            ServerPlayer serverPlayer = ((ServerPlayerPacketHandlerHooks)this).getPlayer();
             return new Vec3i((int)serverPlayer.x, (int)serverPlayer.y, (int)serverPlayer.z);
         }
 
@@ -34,15 +33,15 @@ public interface CommandSourceHooks {
 
     default List<PermissionNode> getPermissions() {
         if (this instanceof MinecraftServer || this instanceof ServerGUI) {
-            return getAllPermssions();
+            return getAllPermissions();
         } else if (this instanceof class_11){
-            ServerPlayer serverPlayer = ((ServerPlayerPacketHandlerMixin)this).getPlayer();
+            ServerPlayer serverPlayer = ((ServerPlayerPacketHandlerHooks)this).getPlayer();
             return LegacyBrigadierServer.permissionsMap.get(serverPlayer.name);
         }
         return new ArrayList<>();
     }
 
-    default List<PermissionNode> getAllPermssions() {
+    default List<PermissionNode> getAllPermissions() {
         List<PermissionNode> list = new ArrayList<>();
         list.add(PermissionNode.ROOT);
         return list;

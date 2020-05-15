@@ -3,8 +3,8 @@ package com.williambl.legacybrigadier.server.network;
 import com.mojang.brigadier.ParseResults;
 import com.mojang.brigadier.suggestion.Suggestion;
 import com.mojang.brigadier.suggestion.Suggestions;
-import com.williambl.legacybrigadier.mixin.ServerPlayerPacketHandlerMixin;
 import com.williambl.legacybrigadier.server.LegacyBrigadierServer;
+import com.williambl.legacybrigadier.server.mixinhooks.ServerPlayerPacketHandlerHooks;
 import io.github.minecraftcursedlegacy.api.networking.PluginChannel;
 import io.github.minecraftcursedlegacy.api.registry.Id;
 import net.fabricmc.api.EnvType;
@@ -41,7 +41,7 @@ public class LegacyBrigadierPluginChannelServer extends PluginChannel {
                 return;
             }
             if (suggestions.getList().size() > 0)
-                send(stringsToBytes(applySuggestions(incompleteCommand, suggestions.getList())), ((ServerPlayerPacketHandlerMixin)packetHandler).getPlayer());
+                send(stringsToBytes(applySuggestions(incompleteCommand, suggestions.getList())), ((ServerPlayerPacketHandlerHooks)packetHandler).getPlayer());
         }
     }
 

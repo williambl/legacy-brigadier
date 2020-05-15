@@ -10,6 +10,7 @@
   "server": [
     "CommandManagerMixin",
     "CommandSourceMixin",
+    "MinecraftServerMixin",
     "ServerPlayerPacketHandlerMixin"
   ],
   "injectors": {
