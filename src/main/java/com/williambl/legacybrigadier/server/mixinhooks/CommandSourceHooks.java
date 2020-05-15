@@ -1,5 +1,6 @@
 package com.williambl.legacybrigadier.server.mixinhooks;
 
+import com.williambl.legacybrigadier.mixin.ServerGUIMixin;
 import com.williambl.legacybrigadier.server.LegacyBrigadierServer;
 import com.williambl.legacybrigadier.server.api.permission.PermissionNode;
 import net.fabricmc.api.EnvType;
@@ -16,6 +17,7 @@ import java.util.List;
 
 @Environment(EnvType.SERVER)
 public interface CommandSourceHooks {
+
     default Level getWorld() {
         if (this instanceof class_11)
             return ((ServerPlayerPacketHandlerHooks)this).getPlayer().level;
@@ -28,6 +30,16 @@ public interface CommandSourceHooks {
             return new Vec3i((int)serverPlayer.x, (int)serverPlayer.y, (int)serverPlayer.z);
         }
 
+        return null;
+    }
+
+    default MinecraftServer getServer() {
+        if (this instanceof class_11)
+            return ((ServerPlayerPacketHandlerHooks)this).getServer();
+        if (this instanceof MinecraftServer)
+            return (MinecraftServer) this;
+        if (this instanceof ServerGUI)
+            return ((ServerGUIMixin)this).getServer();
         return null;
     }
 

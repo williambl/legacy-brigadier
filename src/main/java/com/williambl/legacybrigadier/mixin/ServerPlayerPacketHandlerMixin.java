@@ -18,6 +18,9 @@ public abstract class ServerPlayerPacketHandlerMixin implements ServerPlayerPack
     @Accessor(value = "field_920")
     public abstract ServerPlayer getPlayer();
 
+    @Accessor(value = "field_919")
+    public abstract MinecraftServer getServer();
+
     @Shadow
     private MinecraftServer field_919;
 
