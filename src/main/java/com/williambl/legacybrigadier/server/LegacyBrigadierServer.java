@@ -17,6 +17,8 @@ import static com.mojang.brigadier.arguments.IntegerArgumentType.getInteger;
 import static com.mojang.brigadier.arguments.IntegerArgumentType.integer;
 import static com.williambl.legacybrigadier.server.api.argument.CoordinateArgumentType.coordinate;
 import static com.williambl.legacybrigadier.server.api.argument.CoordinateArgumentType.getCoordinate;
+import static com.williambl.legacybrigadier.server.api.argument.TileIdArgumentType.getTileId;
+import static com.williambl.legacybrigadier.server.api.argument.TileIdArgumentType.tileId;
 
 @Environment(EnvType.SERVER)
 public class LegacyBrigadierServer implements DedicatedServerModInitializer {
@@ -35,17 +37,17 @@ public class LegacyBrigadierServer implements DedicatedServerModInitializer {
 						.then(
 								RequiredArgumentBuilder.<class_39, Vec3i>argument("pos", coordinate())
 										.then(
-												RequiredArgumentBuilder.<class_39, Integer>argument("id", integer())
+												RequiredArgumentBuilder.<class_39, Integer>argument("id", tileId())
 														.executes(context -> {
 															Vec3i pos = getCoordinate(context, "pos");
-															((CommandSourceHooks) context.getSource()).getWorld().setTile(pos.x, pos.y, pos.z, getInteger(context, "id"));
+															((CommandSourceHooks) context.getSource()).getWorld().setTile(pos.x, pos.y, pos.z, getTileId(context, "id"));
 															return 0;
 														})
 														.then(
 																RequiredArgumentBuilder.<class_39, Integer>argument("meta", integer())
 																		.executes(context -> {
 																			Vec3i pos = getCoordinate(context, "pos");
-																			((CommandSourceHooks) context.getSource()).getWorld().method_201(pos.x, pos.y, pos.z, getInteger(context, "id"), getInteger(context, "meta"));
+																			((CommandSourceHooks) context.getSource()).getWorld().method_201(pos.x, pos.y, pos.z, getTileId(context, "id"), getInteger(context, "meta"));
 																			return 0;
 																		})
 														)
