@@ -8,6 +8,7 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.williambl.legacybrigadier.server.api.CommandRegistry;
 import com.williambl.legacybrigadier.server.api.argument.EntityId;
+import com.williambl.legacybrigadier.server.api.argument.ItemId;
 import com.williambl.legacybrigadier.server.api.argument.PlayerSelector;
 import com.williambl.legacybrigadier.server.api.argument.TileId;
 import com.williambl.legacybrigadier.server.api.permission.PermissionNode;
@@ -22,6 +23,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityRegistry;
 import net.minecraft.level.Level;
 import net.minecraft.packet.play.SendChatMessageC2S;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.Vec3i;
 
 import java.io.File;
@@ -43,6 +45,8 @@ import static com.williambl.legacybrigadier.server.api.argument.CoordinateArgume
 import static com.williambl.legacybrigadier.server.api.argument.CoordinateArgumentType.getCoordinate;
 import static com.williambl.legacybrigadier.server.api.argument.EntityIdArgumentType.entityId;
 import static com.williambl.legacybrigadier.server.api.argument.EntityIdArgumentType.getEntityId;
+import static com.williambl.legacybrigadier.server.api.argument.ItemIdArgumentType.getItemId;
+import static com.williambl.legacybrigadier.server.api.argument.ItemIdArgumentType.itemId;
 import static com.williambl.legacybrigadier.server.api.argument.PlayerSelectorArgumentType.getPlayer;
 import static com.williambl.legacybrigadier.server.api.argument.PlayerSelectorArgumentType.player;
 import static com.williambl.legacybrigadier.server.api.argument.TileIdArgumentType.getTileId;
@@ -173,20 +177,73 @@ public class LegacyBrigadierServer implements DedicatedServerModInitializer {
 
 		CommandRegistry.register(
 				LiteralArgumentBuilder.<class_39>literal("msg")
-				.then(
-						RequiredArgumentBuilder.<class_39, PlayerSelector>argument("player", player())
 						.then(
-								RequiredArgumentBuilder.<class_39, String>argument("message", greedyString())
-								.executes(context -> {
-									getPlayer(context, "player").getPlayers(context.getSource()).forEach(player -> {
-										String message = "§7" + context.getSource().method_1410() + " whispers " + getString(context, "message");
-										LOGGER.info(message + " to " + player);
-										((CommandSourceHooks)(context.getSource())).getServer().field_2842.method_562(player, new SendChatMessageC2S(message));
-									});
-									return 0;
-										})
-						)
-				),
+								RequiredArgumentBuilder.<class_39, PlayerSelector>argument("player", player())
+										.then(
+												RequiredArgumentBuilder.<class_39, String>argument("message", greedyString())
+														.executes(context -> {
+															getPlayer(context, "player").getPlayerNames(context.getSource()).forEach(player -> {
+																String message = "§7" + context.getSource().method_1410() + " whispers " + getString(context, "message");
+																LOGGER.info(message + " to " + player);
+																((CommandSourceHooks)(context.getSource())).getServer().field_2842.method_562(player, new SendChatMessageC2S(message));
+															});
+															return 0;
+														})
+										)
+						),
+				"Whisper something to a player"
+		);
+
+		CommandRegistry.register(
+				LiteralArgumentBuilder.<class_39>literal("give")
+						.then(
+								RequiredArgumentBuilder.<class_39, PlayerSelector>argument("player", player())
+										.then(
+												RequiredArgumentBuilder.<class_39, ItemId>argument("item", itemId())
+														.executes(context -> {
+															MinecraftServer server = ((CommandSourceHooks)(context.getSource())).getServer();
+															Level level = ((CommandSourceHooks)(context.getSource())).getWorld();
+															getPlayer(context, "player").getPlayers(context.getSource()).forEach(player -> {
+																int item = getItemId(context, "item").getId();
+																context.getSource().method_1409("Giving " + player.name + " some " + item);
+																LOGGER.info("Giving " + player.name + " some " + item);
+																player.dropItem(item, 1, 0);
+															});
+															return 0;
+														})
+														.then(
+																RequiredArgumentBuilder.<class_39, Integer>argument("count", integer(0, 64))
+																		.executes(context -> {
+																			MinecraftServer server = ((CommandSourceHooks)(context.getSource())).getServer();
+																			Level level = ((CommandSourceHooks)(context.getSource())).getWorld();
+																			getPlayer(context, "player").getPlayers(context.getSource()).forEach(player -> {
+																				int item = getItemId(context, "item").getId();
+																				int count = getInteger(context, "count");
+																				context.getSource().method_1409("Giving " + player.name + " " + count + " of " + item);
+																				LOGGER.info("Giving " + player.name + " " + count + " of " + item);
+																				player.dropItem(item, count, 0);
+																			});
+																			return 0;
+																		})
+																		.then(
+																				RequiredArgumentBuilder.<class_39, Integer>argument("meta", integer(0, 15))
+																						.executes(context -> {
+																							MinecraftServer server = ((CommandSourceHooks)(context.getSource())).getServer();
+																							Level level = ((CommandSourceHooks)(context.getSource())).getWorld();
+																							getPlayer(context, "player").getPlayers(context.getSource()).forEach(player -> {
+																								int item = getItemId(context, "item").getId();
+																								int count = getInteger(context, "count");
+																								int meta = getInteger(context, "meta");
+																								context.getSource().method_1409("Giving " + player.name + " " + count + " of " + item + ":" + meta);
+																								LOGGER.info("Giving " + player.name + " " + count + " of " + item + ":" + meta);
+																								player.dropItem(item, count, meta);
+																							});
+																							return 0;
+																						})
+																		)
+														)
+										)
+						),
 				"Whisper something to a player"
 		);
 	}

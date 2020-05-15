@@ -1,8 +1,10 @@
 package com.williambl.legacybrigadier.server.api.argument;
 
 import com.williambl.legacybrigadier.server.mixinhooks.CommandSourceHooks;
+import com.williambl.legacybrigadier.server.mixinhooks.ServerPlayerPacketHandlerHooks;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.class_11;
 import net.minecraft.class_39;
 import net.minecraft.entity.player.Player;
 
@@ -42,7 +44,7 @@ public class PlayerSelector {
         return type;
     }
 
-    public List<String> getPlayers(class_39 commandSource) {
+    public List<String> getPlayerNames(class_39 commandSource) {
         List<String> result = new ArrayList<>();
         switch (type) {
             case RAW:
@@ -54,6 +56,27 @@ public class PlayerSelector {
                 break;
             case P:
                 result.add(commandSource.method_1410());
+                break;
+        }
+        return result;
+    }
+
+    public List<Player> getPlayers(class_39 commandSource) {
+        List<Player> result = new ArrayList<>();
+        List<Player> players = ((CommandSourceHooks)commandSource).getWorld().players;
+        switch (type) {
+            case RAW:
+                for (Player player : players) {
+                    if (player.name.equals(id))
+                        result.add(player);
+                }
+                break;
+            case A:
+                result.addAll(players);
+                break;
+            case P:
+                if (commandSource instanceof class_11)
+                    result.add(((ServerPlayerPacketHandlerHooks)commandSource).getPlayer());
                 break;
         }
         return result;
