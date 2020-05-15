@@ -23,6 +23,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityRegistry;
 import net.minecraft.level.Level;
 import net.minecraft.packet.play.SendChatMessageC2S;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.Vec3i;
 
 import java.io.File;
