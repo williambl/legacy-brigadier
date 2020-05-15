@@ -11,6 +11,9 @@ import net.minecraft.network.ClientPlayNetworkHandler;
 import net.minecraft.network.PacketHandler;
 
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 @Environment(EnvType.CLIENT)
 public class LegacyBrigadierPluginChannelClient extends PluginChannel {
@@ -25,12 +28,31 @@ public class LegacyBrigadierPluginChannelClient extends PluginChannel {
     @Override
     public void onRecieve(PacketHandler packetHandler, byte[] bytes) {
         if (packetHandler instanceof ClientPlayNetworkHandler) {
-            String completion = new String(bytes, StandardCharsets.UTF_8);
+            List<String> completions = bytesToStrings(bytes);
             Screen screen = LegacyBrigadierClient.MINECRAFT.currentScreen;
             if (screen instanceof ChatScreenHooks) {
                 ChatScreenHooks chatScreen = (ChatScreenHooks) screen;
-                chatScreen.setMessage("/"+completion);
+                if (completions.size() > 0) {
+                    chatScreen.setMessage("/" + completions.get(0));
+                    chatScreen.setCompletions(completions);
+                }
             }
         }
+    }
+
+    private List<String> bytesToStrings(byte[] bytes) {
+        List<String> strings = new ArrayList<>();
+        for (int i = 0; i < bytes.length; i++) {
+            if (bytes[i] == 0b00000000)
+                break;
+
+            final int stringStart = i;
+            while (i < bytes.length && bytes[i] != 0b00000000) {
+                i++;
+            }
+            final int stringEnd = i;
+            strings.add(new String(Arrays.copyOfRange(bytes, stringStart, stringEnd), StandardCharsets.UTF_8));
+        }
+        return strings;
     }
 }
