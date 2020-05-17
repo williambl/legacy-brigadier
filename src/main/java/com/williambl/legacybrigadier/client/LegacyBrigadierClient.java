@@ -2,6 +2,8 @@ package com.williambl.legacybrigadier.client;
 
 import com.williambl.legacybrigadier.client.network.LegacyBrigadierPluginChannelClient;
 import io.github.minecraftcursedlegacy.api.networking.PluginChannelRegistry;
+import io.github.minecraftcursedlegacy.api.registry.Id;
+import io.github.minecraftcursedlegacy.api.registry.Registries;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -31,10 +33,11 @@ public class LegacyBrigadierClient implements ClientModInitializer {
         }
     }
 
-    public static final Tile COMMAND_TILE = new Tile(97, Material.STONE) {};
-
     @Override
     public void onInitializeClient() {
+
+        Registries.TILE.register(new Id("legacybrigadier", "commandtile"), i -> new Tile(i, Material.STONE) {});
+
         PluginChannelRegistry.registerPluginChannel(CHANNEL);
     }
 }

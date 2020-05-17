@@ -16,6 +16,8 @@ import com.williambl.legacybrigadier.server.api.permission.PermissionNode;
 import com.williambl.legacybrigadier.server.mixinhooks.CommandSourceHooks;
 import com.williambl.legacybrigadier.server.network.LegacyBrigadierPluginChannelServer;
 import io.github.minecraftcursedlegacy.api.networking.PluginChannelRegistry;
+import io.github.minecraftcursedlegacy.api.registry.Id;
+import io.github.minecraftcursedlegacy.api.registry.Registries;
 import net.fabricmc.api.DedicatedServerModInitializer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -104,31 +106,31 @@ public class LegacyBrigadierServer implements DedicatedServerModInitializer {
 		}
 	}
 
-	public static final Tile COMMAND_TILE = new Tile(97, Material.STONE) {
-		@Override
-		public boolean method_1608(Level level, int x, int y, int z, Player player) {
-			super.activate(level, x, y, z, player);
-			TileEntity entity = level.getTileEntity(x, y+1, z);
-			if (!(entity instanceof SignEntity))
-				return false;
-			StringBuilder command = new StringBuilder();
-			for (String line : ((SignEntity) entity).lines) {
-				command.append(line);
-			}
-			try {
-				dispatcher.execute(command.toString(), ((ServerPlayer)player).field_255);
-			} catch (CommandSyntaxException e) {
-				((ServerPlayer)player).field_255.method_1409(e.getMessage());
-				return true;
-			}
-			return true;
-		}
-	};
-
 	@Override
 	public void onInitializeServer() {
 
 		PluginChannelRegistry.registerPluginChannel(CHANNEL);
+
+		Registries.TILE.register(new Id("legacybrigadier", "commandtile"), i -> new Tile(i, Material.STONE) {
+			@Override
+			public boolean method_1608(Level level, int x, int y, int z, Player player) {
+				super.activate(level, x, y, z, player);
+				TileEntity entity = level.getTileEntity(x, y+1, z);
+				if (!(entity instanceof SignEntity))
+					return false;
+				StringBuilder command = new StringBuilder();
+				for (String line : ((SignEntity) entity).lines) {
+					command.append(line);
+				}
+				try {
+					dispatcher.execute(command.toString(), ((ServerPlayer)player).field_255);
+				} catch (CommandSyntaxException e) {
+					((ServerPlayer)player).field_255.method_1409(e.getMessage());
+					return true;
+				}
+				return true;
+			}
+		});
 
 		CommandRegistry.register(
 				LiteralArgumentBuilder.<class_39>literal("settile")
