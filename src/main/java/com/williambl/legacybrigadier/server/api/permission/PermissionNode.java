@@ -15,8 +15,8 @@ public class PermissionNode {
     }
 
     public boolean satisfies(PermissionNode nodeToCheck) {
-        String[] pathElements = getPath().split(".");
-        String[] checkPathElements = nodeToCheck.getPath().split(".");
+        String[] pathElements = getPath().split("\\.");
+        String[] checkPathElements = nodeToCheck.getPath().split("\\.");
 
         for (int i = 0; i < checkPathElements.length; i++) {
             String node1 = i < pathElements.length ? pathElements[i] : "*";

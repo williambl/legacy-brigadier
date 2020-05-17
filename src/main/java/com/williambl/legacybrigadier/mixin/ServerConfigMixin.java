@@ -27,4 +27,9 @@ public class ServerConfigMixin {
         }
         return false;
     }
+
+    @Redirect(method = "method_584", at = @At(value = "INVOKE", target = "Ljava/lang/String;toLowerCase()Ljava/lang/String;"))
+    String dontLowercase(String s) {
+        return s;
+    }
 }
