@@ -139,14 +139,14 @@ public class LegacyBrigadierServer implements DedicatedServerModInitializer {
 												RequiredArgumentBuilder.<class_39, TileId>argument("id", tileId())
 														.executes(context -> {
 															Vec3i pos = getCoordinate(context, "pos");
-															((CommandSourceHooks) context.getSource()).getWorld().setTile(pos.x, pos.y, pos.z, getTileId(context, "id").getId());
+															((CommandSourceHooks) context.getSource()).getWorld().setTile(pos.x, pos.y, pos.z, getTileId(context, "id").getNumericId());
 															return 0;
 														})
 														.then(
 																RequiredArgumentBuilder.<class_39, Integer>argument("meta", integer())
 																		.executes(context -> {
 																			Vec3i pos = getCoordinate(context, "pos");
-																			((CommandSourceHooks) context.getSource()).getWorld().method_201(pos.x, pos.y, pos.z, getTileId(context, "id").getId(), getInteger(context, "meta"));
+																			((CommandSourceHooks) context.getSource()).getWorld().method_201(pos.x, pos.y, pos.z, getTileId(context, "id").getNumericId(), getInteger(context, "meta"));
 																			return 0;
 																		})
 														)
@@ -234,7 +234,7 @@ public class LegacyBrigadierServer implements DedicatedServerModInitializer {
 												RequiredArgumentBuilder.<class_39, ItemId>argument("item", itemId())
 														.executes(context -> {
 															getPlayer(context, "player").getPlayers(context.getSource()).forEach(player -> {
-																int item = getItemId(context, "item").getId();
+																int item = getItemId(context, "item").getNumericId();
 																context.getSource().method_1409("Giving " + player.name + " some " + item);
 																LOGGER.info("Giving " + player.name + " some " + item);
 																player.dropItem(item, 1, 0);
@@ -245,7 +245,7 @@ public class LegacyBrigadierServer implements DedicatedServerModInitializer {
 																RequiredArgumentBuilder.<class_39, Integer>argument("count", integer(0, 64))
 																		.executes(context -> {
 																			getPlayer(context, "player").getPlayers(context.getSource()).forEach(player -> {
-																				int item = getItemId(context, "item").getId();
+																				int item = getItemId(context, "item").getNumericId();
 																				int count = getInteger(context, "count");
 																				context.getSource().method_1409("Giving " + player.name + " " + count + " of " + item);
 																				LOGGER.info("Giving " + player.name + " " + count + " of " + item);
@@ -257,7 +257,7 @@ public class LegacyBrigadierServer implements DedicatedServerModInitializer {
 																				RequiredArgumentBuilder.<class_39, Integer>argument("meta", integer(0, 15))
 																						.executes(context -> {
 																							getPlayer(context, "player").getPlayers(context.getSource()).forEach(player -> {
-																								int item = getItemId(context, "item").getId();
+																								int item = getItemId(context, "item").getNumericId();
 																								int count = getInteger(context, "count");
 																								int meta = getInteger(context, "meta");
 																								context.getSource().method_1409("Giving " + player.name + " " + count + " of " + item + ":" + meta);

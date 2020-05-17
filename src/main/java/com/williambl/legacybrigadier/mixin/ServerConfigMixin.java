@@ -9,6 +9,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
+import java.util.List;
 import java.util.Set;
 
 @Mixin(class_166.class)
@@ -19,7 +20,10 @@ public class ServerConfigMixin {
     @Redirect(method = "method_584(Ljava/lang/String;)Z", at = @At(value = "INVOKE", target = "Ljava/util/Set;contains(Ljava/lang/Object;)Z"))
     boolean isOperator(Set set, Object o) {
         if (o instanceof String) {
-            return PermissionNode.OPERATOR.isSatisfiedBy(LegacyBrigadierServer.permissionsMap.get(o));
+            List<PermissionNode> nodes = LegacyBrigadierServer.permissionsMap.get(o);
+            if (nodes == null)
+                return false;
+            return PermissionNode.OPERATOR.isSatisfiedBy(nodes);
         }
         return false;
     }

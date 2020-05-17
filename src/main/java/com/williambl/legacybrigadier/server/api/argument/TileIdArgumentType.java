@@ -8,13 +8,16 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-import net.minecraft.tile.Tile;
+import com.williambl.legacybrigadier.server.StringReaderUtils;
+import io.github.minecraftcursedlegacy.api.registry.Id;
+import io.github.minecraftcursedlegacy.api.registry.Registries;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 public class TileIdArgumentType implements ArgumentType<TileId> {
 
@@ -22,37 +25,30 @@ public class TileIdArgumentType implements ArgumentType<TileId> {
 
     private static final SimpleCommandExceptionType NOT_VALID_ID = new SimpleCommandExceptionType(new LiteralMessage("Invalid Tile ID"));
 
-    private static String[] validStringValues;
-    private static List<Integer> validValues;
+    private static Set<String> validValues;
+    private static Map<Integer, String> intId2Id;
 
-    private static String[] getValidStringValues() {
-        if (validStringValues != null)
-            return validStringValues;
-        List<Integer> validIntValues = getValidValues();
-        validStringValues = new String[validIntValues.size()];
-        for (int i = 0; i < validIntValues.size(); i++) {
-            validStringValues[i] = validIntValues.get(i).toString();
-        }
-        return validStringValues;
-    }
-
-    private static List<Integer> getValidValues() {
+    private static Set<String> getValidValues() {
         if (validValues != null)
             return validValues;
-        validValues = new ArrayList<>();
-        for (int i = 0; i < Tile.BY_ID.length; i++) {
-            if (Tile.BY_ID[i] != null)
-                validValues.add(i);
-        }
+
+        Set<Id> ids = Registries.TILE.ids();
+        validValues = ids.stream().map(Id::toString).collect(Collectors.toSet());
+
         return validValues;
     }
 
-    private boolean isValueValid(int value) {
-        for (Integer validValue : getValidValues()) {
-            if (validValue == value)
-                return true;
-        }
-        return false;
+    private static Map<Integer, String> getIntId2Id() {
+        if (intId2Id != null)
+            return intId2Id;
+        Set<Integer> intIds = Registries.TILE.serialisedIds();
+        intId2Id = intIds.stream().collect(Collectors.toMap(integer -> integer, integer -> {
+            Id id = Registries.TILE.getId(Registries.TILE.getBySerialisedId(integer));
+            if (id == null)
+                return "";
+            return id.toString();
+        }));
+        return intId2Id;
     }
 
     public static TileIdArgumentType tileId() {
@@ -66,8 +62,8 @@ public class TileIdArgumentType implements ArgumentType<TileId> {
     @Override
     public TileId parse(StringReader reader) throws CommandSyntaxException {
         int cursor = reader.getCursor();
-        int id = reader.readInt();
-        if (!isValueValid(id)) {
+        String id = StringReaderUtils.readId(reader);
+        if (!getValidValues().contains(id)) {
             reader.setCursor(cursor);
             throw NOT_VALID_ID.createWithContext(reader);
         }
@@ -76,10 +72,14 @@ public class TileIdArgumentType implements ArgumentType<TileId> {
 
     @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-        for (String validValue : getValidStringValues()) {
-            if (validValue.startsWith(builder.getRemaining()))
+        for (String validValue : getValidValues()) {
+            if (validValue.startsWith(builder.getRemaining()) || validValue.substring(validValue.indexOf(':')+1, validValue.length()-1).startsWith(builder.getRemaining()))
                 builder.suggest(validValue);
         }
+        getIntId2Id().forEach((integer, id) -> {
+            if (integer.toString().startsWith(builder.getRemaining()))
+                builder.suggest(id); //Only ever suggest string ids
+        });
         return builder.buildFuture();
     }
 
