@@ -6,6 +6,7 @@ import com.google.gson.reflect.TypeToken;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.williambl.legacybrigadier.server.api.CommandRegistry;
 import com.williambl.legacybrigadier.server.api.argument.EntityId;
 import com.williambl.legacybrigadier.server.api.argument.ItemId;
@@ -21,8 +22,14 @@ import net.fabricmc.api.Environment;
 import net.minecraft.class_39;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityRegistry;
+import net.minecraft.entity.SignEntity;
+import net.minecraft.entity.TileEntity;
+import net.minecraft.entity.player.Player;
+import net.minecraft.entity.player.ServerPlayer;
 import net.minecraft.level.Level;
 import net.minecraft.packet.play.SendChatMessageC2S;
+import net.minecraft.tile.Tile;
+import net.minecraft.tile.material.Material;
 import net.minecraft.util.Vec3i;
 
 import java.io.File;
@@ -96,6 +103,27 @@ public class LegacyBrigadierServer implements DedicatedServerModInitializer {
 			e.printStackTrace();
 		}
 	}
+
+	public static final Tile COMMAND_TILE = new Tile(97, Material.STONE) {
+		@Override
+		public boolean method_1608(Level level, int x, int y, int z, Player player) {
+			super.activate(level, x, y, z, player);
+			TileEntity entity = level.getTileEntity(x, y+1, z);
+			if (!(entity instanceof SignEntity))
+				return false;
+			StringBuilder command = new StringBuilder();
+			for (String line : ((SignEntity) entity).lines) {
+				command.append(line);
+			}
+			try {
+				dispatcher.execute(command.toString(), ((ServerPlayer)player).field_255);
+			} catch (CommandSyntaxException e) {
+				((ServerPlayer)player).field_255.method_1409(e.getMessage());
+				return true;
+			}
+			return true;
+		}
+	};
 
 	@Override
 	public void onInitializeServer() {

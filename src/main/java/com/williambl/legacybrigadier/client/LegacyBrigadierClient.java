@@ -6,6 +6,8 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
+import net.minecraft.tile.Tile;
+import net.minecraft.tile.material.Material;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -28,6 +30,8 @@ public class LegacyBrigadierClient implements ClientModInitializer {
             e.printStackTrace();
         }
     }
+
+    public static final Tile COMMAND_TILE = new Tile(97, Material.STONE) {};
 
     @Override
     public void onInitializeClient() {
