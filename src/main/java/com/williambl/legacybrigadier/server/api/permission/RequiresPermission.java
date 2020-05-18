@@ -3,12 +3,12 @@ package com.williambl.legacybrigadier.server.api.permission;
 import com.williambl.legacybrigadier.server.mixinhooks.CommandSourceHooks;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.class_39;
+import net.minecraft.server.command.CommandSource;
 
 import java.util.function.Predicate;
 
 @Environment(EnvType.SERVER)
-public class RequiresPermission implements Predicate<class_39> {
+public class RequiresPermission implements Predicate<CommandSource> {
 
     private final PermissionNode node;
 
@@ -21,7 +21,7 @@ public class RequiresPermission implements Predicate<class_39> {
     }
 
     @Override
-    public boolean test(class_39 commandSource) {
+    public boolean test(CommandSource commandSource) {
         return ((CommandSourceHooks)commandSource).satisfiesNode(node);
     }
 }

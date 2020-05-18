@@ -8,10 +8,8 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-import com.williambl.legacybrigadier.server.mixinhooks.CommandSourceHooks;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.entity.player.Player;
 import net.minecraft.server.command.CommandSource;
 
 import java.util.ArrayList;
@@ -21,36 +19,42 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 @Environment(EnvType.SERVER)
-public class PlayerSelectorArgumentType implements ArgumentType<PlayerSelector> {
+public class EnumArgumentType<T extends Enum<T>> implements ArgumentType<T> {
 
-    private static final Collection<String> EXAMPLES = Arrays.asList("@a", "Notch", "@p");
+    private static final Collection<String> EXAMPLES = Arrays.asList("", "", "");
 
-    private static final SimpleCommandExceptionType NOT_VALID_ID = new SimpleCommandExceptionType(new LiteralMessage("Invalid Player"));
+    private static final SimpleCommandExceptionType NOT_VALID_VALUE = new SimpleCommandExceptionType(new LiteralMessage("Invalid Value"));
 
-    @SuppressWarnings("unchecked")
-    private static List<String> getValidValues(CommandContext<CommandSource> context) {
+    private final T[] elements;
+
+    public EnumArgumentType(Class<T> theClazz) {
+        this.elements = theClazz.getEnumConstants();
+    }
+
+    private List<String> getValidValues(CommandContext<CommandSource> context) {
         List<String> validValues = new ArrayList<>();
-        List<Player> players = ((CommandSourceHooks)context.getSource()).getWorld().players;
-        players.forEach(it -> validValues.add(it.name));
-        validValues.add("@a");
-        validValues.add("@p");
+        for (T element : elements) {
+            validValues.add(element.name());
+        }
         return validValues;
     }
 
-    public static PlayerSelectorArgumentType player() {
-        return new PlayerSelectorArgumentType();
+    public static <T extends Enum<T>>EnumArgumentType<T> enumArg(Class<T> clazz) {
+        return new EnumArgumentType<T>(clazz);
     }
 
-    public static PlayerSelector getPlayer(final CommandContext<?> context, final String name) {
-        return context.getArgument(name, PlayerSelector.class);
+    public static <T> T getValue(final CommandContext<?> context, final String name, Class<T> clazz) {
+        return context.getArgument(name, clazz);
     }
 
     @Override
-    public PlayerSelector parse(StringReader reader) throws CommandSyntaxException {
-        char first = reader.read(); //evil hack to force it to recognise '@' as a valid character
-        String selector = first + reader.readUnquotedString();
-        System.out.println(selector);
-        return new PlayerSelector(selector);
+    public T parse(StringReader reader) throws CommandSyntaxException {
+        String string = reader.readUnquotedString();
+        for (T element : elements) {
+            if (element.name().equals(string))
+                return element;
+        }
+        throw NOT_VALID_VALUE.createWithContext(reader);
     }
 
     @Override

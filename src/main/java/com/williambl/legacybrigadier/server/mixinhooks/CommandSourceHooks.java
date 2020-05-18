@@ -5,11 +5,11 @@ import com.williambl.legacybrigadier.server.LegacyBrigadierServer;
 import com.williambl.legacybrigadier.server.api.permission.PermissionNode;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.class_11;
 import net.minecraft.entity.player.ServerPlayer;
 import net.minecraft.level.Level;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.ServerGUI;
+import net.minecraft.server.network.ServerPlayerPacketHandler;
 import net.minecraft.util.Vec3i;
 
 import java.util.ArrayList;
@@ -19,13 +19,13 @@ import java.util.List;
 public interface CommandSourceHooks {
 
     default Level getWorld() {
-        if (this instanceof class_11)
+        if (this instanceof ServerPlayerPacketHandler)
             return ((ServerPlayerPacketHandlerHooks)this).getPlayer().level;
         return null;
     }
 
     default Vec3i getPosition() {
-        if (this instanceof class_11) {
+        if (this instanceof ServerPlayerPacketHandler) {
             ServerPlayer serverPlayer = ((ServerPlayerPacketHandlerHooks)this).getPlayer();
             return new Vec3i((int)serverPlayer.x, (int)serverPlayer.y, (int)serverPlayer.z);
         }
@@ -34,7 +34,7 @@ public interface CommandSourceHooks {
     }
 
     default MinecraftServer getServer() {
-        if (this instanceof class_11)
+        if (this instanceof ServerPlayerPacketHandler)
             return ((ServerPlayerPacketHandlerHooks)this).getServer();
         if (this instanceof MinecraftServer)
             return (MinecraftServer) this;
@@ -46,7 +46,7 @@ public interface CommandSourceHooks {
     default List<PermissionNode> getPermissions() {
         if (this instanceof MinecraftServer || this instanceof ServerGUI) {
             return getAllPermissions();
-        } else if (this instanceof class_11){
+        } else if (this instanceof ServerPlayerPacketHandler){
             ServerPlayer serverPlayer = ((ServerPlayerPacketHandlerHooks)this).getPlayer();
             return LegacyBrigadierServer.permissionsMap.get(serverPlayer.name);
         }

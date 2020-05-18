@@ -7,6 +7,6 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 
 @Mixin(ServerGUI.class)
 public interface ServerGUIMixin {
-    @Accessor("field_1978")
+    @Accessor("server")
     MinecraftServer getServer();
 }

@@ -9,9 +9,9 @@ import io.github.minecraftcursedlegacy.api.networking.PluginChannel;
 import io.github.minecraftcursedlegacy.api.registry.Id;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.class_11;
-import net.minecraft.class_39;
 import net.minecraft.network.PacketHandler;
+import net.minecraft.server.command.CommandSource;
+import net.minecraft.server.network.ServerPlayerPacketHandler;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -30,9 +30,9 @@ public class LegacyBrigadierPluginChannelServer extends PluginChannel {
 
     @Override
     public void onRecieve(PacketHandler packetHandler, byte[] bytes) {
-        if (packetHandler instanceof class_11) {
+        if (packetHandler instanceof ServerPlayerPacketHandler) {
             String incompleteCommand = new String(bytes, StandardCharsets.UTF_8);
-            ParseResults<class_39> parseResults = LegacyBrigadierServer.dispatcher.parse(incompleteCommand, (class_11) packetHandler);
+            ParseResults<CommandSource> parseResults = LegacyBrigadierServer.dispatcher.parse(incompleteCommand, (ServerPlayerPacketHandler) packetHandler);
             Suggestions suggestions;
             try {
                 suggestions = LegacyBrigadierServer.dispatcher.getCompletionSuggestions(parseResults).get();

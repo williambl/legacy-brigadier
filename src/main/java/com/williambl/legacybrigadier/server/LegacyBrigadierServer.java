@@ -21,7 +21,6 @@ import io.github.minecraftcursedlegacy.api.registry.Registries;
 import net.fabricmc.api.DedicatedServerModInitializer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.class_39;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityRegistry;
 import net.minecraft.entity.SignEntity;
@@ -30,6 +29,7 @@ import net.minecraft.entity.player.Player;
 import net.minecraft.entity.player.ServerPlayer;
 import net.minecraft.level.Level;
 import net.minecraft.packet.play.SendChatMessageC2S;
+import net.minecraft.server.command.CommandSource;
 import net.minecraft.tile.Tile;
 import net.minecraft.tile.material.Material;
 import net.minecraft.util.Vec3i;
@@ -64,7 +64,7 @@ import static com.williambl.legacybrigadier.server.api.permission.RequiresPermis
 @Environment(EnvType.SERVER)
 public class LegacyBrigadierServer implements DedicatedServerModInitializer {
 
-	public static CommandDispatcher<class_39> dispatcher = new CommandDispatcher<>();
+	public static CommandDispatcher<CommandSource> dispatcher = new CommandDispatcher<>();
 
 	public static final LegacyBrigadierPluginChannelServer CHANNEL = new LegacyBrigadierPluginChannelServer();
 
@@ -125,7 +125,7 @@ public class LegacyBrigadierServer implements DedicatedServerModInitializer {
 				try {
 					dispatcher.execute(command.toString(), ((ServerPlayer)player).field_255);
 				} catch (CommandSyntaxException e) {
-					((ServerPlayer)player).field_255.method_1409(e.getMessage());
+					((ServerPlayer)player).field_255.sendFeedback(e.getMessage());
 					return true;
 				}
 				return true;
@@ -133,19 +133,19 @@ public class LegacyBrigadierServer implements DedicatedServerModInitializer {
 		});
 
 		CommandRegistry.register(
-				LiteralArgumentBuilder.<class_39>literal("settile")
+				LiteralArgumentBuilder.<CommandSource>literal("settile")
 						.requires(permission("command.settile"))
 						.then(
-								RequiredArgumentBuilder.<class_39, Vec3i>argument("pos", coordinate())
+								RequiredArgumentBuilder.<CommandSource, Vec3i>argument("pos", coordinate())
 										.then(
-												RequiredArgumentBuilder.<class_39, TileId>argument("id", tileId())
+												RequiredArgumentBuilder.<CommandSource, TileId>argument("id", tileId())
 														.executes(context -> {
 															Vec3i pos = getCoordinate(context, "pos");
 															((CommandSourceHooks) context.getSource()).getWorld().setTile(pos.x, pos.y, pos.z, getTileId(context, "id").getNumericId());
 															return 0;
 														})
 														.then(
-																RequiredArgumentBuilder.<class_39, Integer>argument("meta", integer())
+																RequiredArgumentBuilder.<CommandSource, Integer>argument("meta", integer())
 																		.executes(context -> {
 																			Vec3i pos = getCoordinate(context, "pos");
 																			((CommandSourceHooks) context.getSource()).getWorld().method_201(pos.x, pos.y, pos.z, getTileId(context, "id").getNumericId(), getInteger(context, "meta"));
@@ -158,12 +158,12 @@ public class LegacyBrigadierServer implements DedicatedServerModInitializer {
 		);
 
 		CommandRegistry.register(
-				LiteralArgumentBuilder.<class_39>literal("summon")
+				LiteralArgumentBuilder.<CommandSource>literal("summon")
 						.requires(permission("command.summon"))
 						.then(
-								RequiredArgumentBuilder.<class_39, EntityId>argument("id", entityId())
+								RequiredArgumentBuilder.<CommandSource, EntityId>argument("id", entityId())
 										.then(
-												RequiredArgumentBuilder.<class_39, Vec3i>argument("pos", coordinate())
+												RequiredArgumentBuilder.<CommandSource, Vec3i>argument("pos", coordinate())
 														.executes(context -> {
 															Vec3i pos = getCoordinate(context, "pos");
 															Level world = ((CommandSourceHooks)context.getSource()).getWorld();
@@ -178,12 +178,12 @@ public class LegacyBrigadierServer implements DedicatedServerModInitializer {
 		);
 
 		CommandRegistry.register(
-				LiteralArgumentBuilder.<class_39>literal("help")
+				LiteralArgumentBuilder.<CommandSource>literal("help")
 						.requires(permission("command.help"))
 						.executes(context -> {
 									LegacyBrigadierServer.dispatcher
 											.getSmartUsage(LegacyBrigadierServer.dispatcher.getRoot(), context.getSource())
-											.forEach((cmd, usage) -> context.getSource().method_1409(
+											.forEach((cmd, usage) -> context.getSource().sendFeedback(
 													String.format("   %s                        %s", usage, CommandRegistry.getHelp(cmd))
 											));
 									return 0;
@@ -193,12 +193,12 @@ public class LegacyBrigadierServer implements DedicatedServerModInitializer {
 		);
 
 		CommandRegistry.register(
-				LiteralArgumentBuilder.<class_39>literal("me")
+				LiteralArgumentBuilder.<CommandSource>literal("me")
 						.requires(permission("command.me"))
 						.then(
-								RequiredArgumentBuilder.<class_39, String>argument("message", greedyString())
+								RequiredArgumentBuilder.<CommandSource, String>argument("message", greedyString())
 										.executes(context -> {
-											String message = "* " + context.getSource().method_1410() + " " + getString(context, "message").trim();
+											String message = "* " + context.getSource().getName() + " " + getString(context, "message").trim();
 											LOGGER.info(message);
 											((CommandSourceHooks)context.getSource()).getServer().field_2842.method_559(new SendChatMessageC2S(message));
 											return 0;
@@ -208,15 +208,15 @@ public class LegacyBrigadierServer implements DedicatedServerModInitializer {
 		);
 
 		CommandRegistry.register(
-				LiteralArgumentBuilder.<class_39>literal("msg")
+				LiteralArgumentBuilder.<CommandSource>literal("msg")
 						.requires(permission("command.msg"))
 						.then(
-								RequiredArgumentBuilder.<class_39, PlayerSelector>argument("player", player())
+								RequiredArgumentBuilder.<CommandSource, PlayerSelector>argument("player", player())
 										.then(
-												RequiredArgumentBuilder.<class_39, String>argument("message", greedyString())
+												RequiredArgumentBuilder.<CommandSource, String>argument("message", greedyString())
 														.executes(context -> {
 															getPlayer(context, "player").getPlayerNames(context.getSource()).forEach(player -> {
-																String message = "§7" + context.getSource().method_1410() + " whispers " + getString(context, "message");
+																String message = "§7" + context.getSource().getName() + " whispers " + getString(context, "message");
 																LOGGER.info(message + " to " + player);
 																((CommandSourceHooks)(context.getSource())).getServer().field_2842.method_562(player, new SendChatMessageC2S(message));
 															});
@@ -228,41 +228,41 @@ public class LegacyBrigadierServer implements DedicatedServerModInitializer {
 		);
 
 		CommandRegistry.register(
-				LiteralArgumentBuilder.<class_39>literal("give")
+				LiteralArgumentBuilder.<CommandSource>literal("give")
 						.requires(permission("command.give"))
 						.then(
-								RequiredArgumentBuilder.<class_39, PlayerSelector>argument("player", player())
+								RequiredArgumentBuilder.<CommandSource, PlayerSelector>argument("player", player())
 										.then(
-												RequiredArgumentBuilder.<class_39, ItemId>argument("item", itemId())
+												RequiredArgumentBuilder.<CommandSource, ItemId>argument("item", itemId())
 														.executes(context -> {
 															getPlayer(context, "player").getPlayers(context.getSource()).forEach(player -> {
 																int item = getItemId(context, "item").getNumericId();
-																context.getSource().method_1409("Giving " + player.name + " some " + item);
+																context.getSource().sendFeedback("Giving " + player.name + " some " + item);
 																LOGGER.info("Giving " + player.name + " some " + item);
 																player.dropItem(item, 1, 0);
 															});
 															return 0;
 														})
 														.then(
-																RequiredArgumentBuilder.<class_39, Integer>argument("count", integer(0, 64))
+																RequiredArgumentBuilder.<CommandSource, Integer>argument("count", integer(0, 64))
 																		.executes(context -> {
 																			getPlayer(context, "player").getPlayers(context.getSource()).forEach(player -> {
 																				int item = getItemId(context, "item").getNumericId();
 																				int count = getInteger(context, "count");
-																				context.getSource().method_1409("Giving " + player.name + " " + count + " of " + item);
+																				context.getSource().sendFeedback("Giving " + player.name + " " + count + " of " + item);
 																				LOGGER.info("Giving " + player.name + " " + count + " of " + item);
 																				player.dropItem(item, count, 0);
 																			});
 																			return 0;
 																		})
 																		.then(
-																				RequiredArgumentBuilder.<class_39, Integer>argument("meta", integer(0, 15))
+																				RequiredArgumentBuilder.<CommandSource, Integer>argument("meta", integer(0, 15))
 																						.executes(context -> {
 																							getPlayer(context, "player").getPlayers(context.getSource()).forEach(player -> {
 																								int item = getItemId(context, "item").getNumericId();
 																								int count = getInteger(context, "count");
 																								int meta = getInteger(context, "meta");
-																								context.getSource().method_1409("Giving " + player.name + " " + count + " of " + item + ":" + meta);
+																								context.getSource().sendFeedback("Giving " + player.name + " " + count + " of " + item + ":" + meta);
 																								LOGGER.info("Giving " + player.name + " " + count + " of " + item + ":" + meta);
 																								player.dropItem(item, count, meta);
 																							});
@@ -276,20 +276,20 @@ public class LegacyBrigadierServer implements DedicatedServerModInitializer {
 		);
 
 		CommandRegistry.register(
-				LiteralArgumentBuilder.<class_39>literal("time")
+				LiteralArgumentBuilder.<CommandSource>literal("time")
 				.requires(permission("command.time"))
 				.then(
-						LiteralArgumentBuilder.<class_39>literal("set")
-						.then(RequiredArgumentBuilder.<class_39, Integer>argument("time", integer(0))
+						LiteralArgumentBuilder.<CommandSource>literal("set")
+						.then(RequiredArgumentBuilder.<CommandSource, Integer>argument("time", integer(0))
 						.executes(context -> {
 							((CommandSourceHooks)context.getSource()).getWorld().setLevelTime(getInteger(context, "time"));
 							return 0;
 						}))
 				)
 				.then(
-						LiteralArgumentBuilder.<class_39>literal("get")
+						LiteralArgumentBuilder.<CommandSource>literal("get")
 						.executes(context -> {
-							context.getSource().method_1409(Long.toString(((CommandSourceHooks)context.getSource()).getWorld().getLevelTime()));
+							context.getSource().sendFeedback(Long.toString(((CommandSourceHooks)context.getSource()).getWorld().getLevelTime()));
 							return 0;
 						})
 				),

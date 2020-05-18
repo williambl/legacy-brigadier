@@ -5,39 +5,39 @@ import com.williambl.legacybrigadier.server.LegacyBrigadierServer;
 import com.williambl.legacybrigadier.server.api.CommandRegistry;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.class_38;
-import net.minecraft.class_39;
-import net.minecraft.class_426;
+import net.minecraft.server.command.Command;
+import net.minecraft.server.command.CommandManager;
+import net.minecraft.server.command.CommandSource;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(class_426.class)
+@Mixin(CommandManager.class)
 @Environment(EnvType.SERVER)
 public class CommandManagerMixin {
     @Inject(
-            method = "method_1411(Lnet/minecraft/class_38;)V",
+            method = "processCommand",
             at = @At(value = "HEAD"),
             cancellable = true
     )
-    void runCommandThroughBrigadier(class_38 commandInfo, CallbackInfo ci) {
+    void runCommandThroughBrigadier(Command commandInfo, CallbackInfo ci) {
         try {
-        LegacyBrigadierServer.dispatcher.execute(commandInfo.field_159, commandInfo.field_160);
+        LegacyBrigadierServer.dispatcher.execute(commandInfo.commandString, commandInfo.source);
         ci.cancel();
         } catch (CommandSyntaxException e) {
-            commandInfo.field_160.method_1409(e.getMessage());
+            commandInfo.source.sendFeedback(e.getMessage());
         }
     }
 
     @Inject(
-            method = "method_1415",
+            method = "sendHelp",
             at = @At(value = "TAIL")
     )
-    void appendBrigadierHelp(class_39 commandSource, CallbackInfo ci) {
+    void appendBrigadierHelp(CommandSource commandSource, CallbackInfo ci) {
         LegacyBrigadierServer.dispatcher
                 .getSmartUsage(LegacyBrigadierServer.dispatcher.getRoot(), commandSource)
-                .forEach((cmd, usage) -> commandSource.method_1409(
+                .forEach((cmd, usage) -> commandSource.sendFeedback(
                         String.format("   %s                        %s", usage, CommandRegistry.getHelp(cmd))
                 ));
     }
