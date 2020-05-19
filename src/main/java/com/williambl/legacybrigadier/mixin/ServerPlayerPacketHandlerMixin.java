@@ -24,7 +24,7 @@ public abstract class ServerPlayerPacketHandlerMixin implements ServerPlayerPack
     @Shadow
     private MinecraftServer field_919;
 
-    @Redirect(method = "handleChatMessage", at = @At(value = "INVOKE", target = "Lnet/minecraft/class_11;method_836(Ljava/lang/String;)V"))
+    @Redirect(method = "handleChatMessage", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerPlayerPacketHandler;method_836(Ljava/lang/String;)V"))
     void processAllCommands(ServerPlayerPacketHandler handler, String message) {
         field_919.queueCommand(message.substring(1), handler);
     }
