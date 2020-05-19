@@ -2,7 +2,7 @@ package com.williambl.legacybrigadier.server;
 
 import com.mojang.brigadier.StringReader;
 
-public class StringReaderUtils {
+public final class StringReaderUtils {
 
     private static boolean isAllowedInTargetSelector(final char c) {
         return StringReader.isAllowedInUnquotedString(c) || c == '@';

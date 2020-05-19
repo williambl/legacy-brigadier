@@ -11,9 +11,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Environment(EnvType.SERVER)
-public class CommandRegistry {
+public final class CommandRegistry {
 
-    private static Map<CommandNode<CommandSource>, String> helpMap = new HashMap<>();
+    private static final Map<CommandNode<CommandSource>, String> helpMap = new HashMap<>();
 
     public static CommandNode<CommandSource> register(LiteralArgumentBuilder<CommandSource> command, String helpText) {
         CommandNode<CommandSource> result = register(command);

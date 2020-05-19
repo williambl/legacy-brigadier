@@ -64,14 +64,14 @@ import static com.williambl.legacybrigadier.server.api.permission.RequiresPermis
 @Environment(EnvType.SERVER)
 public class LegacyBrigadierServer implements DedicatedServerModInitializer {
 
-	public static CommandDispatcher<CommandSource> dispatcher = new CommandDispatcher<>();
+	public static final CommandDispatcher<CommandSource> dispatcher = new CommandDispatcher<>();
 
 	public static final LegacyBrigadierPluginChannelServer CHANNEL = new LegacyBrigadierPluginChannelServer();
 
 	public static final Logger LOGGER = Logger.getLogger("Minecraft");
 
-	private static Gson GSON = new GsonBuilder().create();
-	public static Map<String, List<PermissionNode>> permissionsMap = new HashMap<>();
+	public static final Map<String, List<PermissionNode>> permissionsMap = new HashMap<>();
+	private static final Gson GSON = new GsonBuilder().create();
 	static {
 		File permissionsFile = new File("config/legacybrigadier/permissions.json");
 		try {

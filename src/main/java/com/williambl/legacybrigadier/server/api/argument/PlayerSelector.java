@@ -14,7 +14,7 @@ import java.util.List;
 @Environment(EnvType.SERVER)
 public class PlayerSelector {
     private final String id;
-    private PlayerIdType type;
+    private final PlayerIdType type;
 
     public PlayerSelector(String id, PlayerIdType type) {
         this.id = id;

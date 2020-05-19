@@ -40,7 +40,7 @@ public class EnumArgumentType<T extends Enum<T>> implements ArgumentType<T> {
     }
 
     public static <T extends Enum<T>>EnumArgumentType<T> enumArg(Class<T> clazz) {
-        return new EnumArgumentType<T>(clazz);
+        return new EnumArgumentType<>(clazz);
     }
 
     public static <T> T getValue(final CommandContext<?> context, final String name, Class<T> clazz) {

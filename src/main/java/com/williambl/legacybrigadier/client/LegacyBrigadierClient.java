@@ -19,8 +19,8 @@ import java.util.List;
 public class LegacyBrigadierClient implements ClientModInitializer {
 
     public static final LegacyBrigadierPluginChannelClient CHANNEL = new LegacyBrigadierPluginChannelClient();
+    public static final List<String> previousMessages = new ArrayList<>();
     public static Minecraft MINECRAFT;
-    public static List<String> previousMessages = new ArrayList<>();
 
     static {
         try {

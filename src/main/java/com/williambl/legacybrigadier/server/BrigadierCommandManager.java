@@ -6,7 +6,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.server.command.Command;
 
 @Environment(EnvType.SERVER)
-public class BrigadierCommandManager {
+public final class BrigadierCommandManager {
     public static void handleCommand(Command command) {
         try {
             LegacyBrigadierServer.dispatcher.execute(command.commandString, command.source);

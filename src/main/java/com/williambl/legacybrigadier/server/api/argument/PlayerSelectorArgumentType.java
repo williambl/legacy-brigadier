@@ -4,7 +4,6 @@ import com.mojang.brigadier.LiteralMessage;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.context.CommandContext;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
@@ -46,7 +45,7 @@ public class PlayerSelectorArgumentType implements ArgumentType<PlayerSelector> 
     }
 
     @Override
-    public PlayerSelector parse(StringReader reader) throws CommandSyntaxException {
+    public PlayerSelector parse(StringReader reader) {
         char first = reader.read(); //evil hack to force it to recognise '@' as a valid character
         String selector = first + reader.readUnquotedString();
         System.out.println(selector);
