@@ -5,14 +5,15 @@
   "mixins": [
   ],
   "client": [
-    "ChatScreenMixin"
+    "ChatScreenMixin",
+    "MinecraftAccessor"
   ],
   "server": [
     "CommandManagerMixin",
     "CommandSourceMixin",
     "MinecraftServerMixin",
     "ServerConfigMixin",
-    "ServerGUIMixin",
+    "ServerGUIAccessor",
     "ServerPlayerPacketHandlerMixin"
   ],
   "injectors": {

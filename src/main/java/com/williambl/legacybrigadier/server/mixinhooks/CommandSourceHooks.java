@@ -1,6 +1,6 @@
 package com.williambl.legacybrigadier.server.mixinhooks;
 
-import com.williambl.legacybrigadier.mixin.ServerGUIMixin;
+import com.williambl.legacybrigadier.mixin.ServerGUIAccessor;
 import com.williambl.legacybrigadier.server.LegacyBrigadierServer;
 import com.williambl.legacybrigadier.server.api.permission.PermissionNode;
 import net.fabricmc.api.EnvType;
@@ -39,7 +39,7 @@ public interface CommandSourceHooks {
         if (this instanceof MinecraftServer)
             return (MinecraftServer) this;
         if (this instanceof ServerGUI)
-            return ((ServerGUIMixin)this).getServer();
+            return ((ServerGUIAccessor)this).getServer();
         return null;
     }
 
