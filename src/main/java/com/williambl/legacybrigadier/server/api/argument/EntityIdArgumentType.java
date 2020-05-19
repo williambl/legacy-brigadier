@@ -8,11 +8,14 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-import com.williambl.legacybrigadier.server.LegacyBrigadierServer;
+import io.github.minecraftcursedlegacy.api.registry.Registries;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 @Environment(EnvType.SERVER)
@@ -24,21 +27,11 @@ public class EntityIdArgumentType implements ArgumentType<EntityId> {
 
     private static List<String> validValues;
 
-    @SuppressWarnings("unchecked")
     private static List<String> getValidValues() {
         if (validValues != null)
             return validValues;
-        Map<String, Class<?>> entityMap;
-        try {
-            entityMap = (Map<String, Class<?>>) LegacyBrigadierServer.ENTITY_MAP.get(null);
-        } catch (IllegalAccessException | ClassCastException e) {
-            System.out.println("Couldn't access entity string ID map :concern:");
-            entityMap = new HashMap<>();
-        }
         validValues = new ArrayList<>();
-        entityMap.forEach((id, clazz) ->
-                validValues.add(id)
-        );
+        Registries.ENTITY_TYPE.ids().forEach(id -> validValues.add(id.toString()));
         return validValues;
     }
 

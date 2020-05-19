@@ -38,7 +38,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -91,17 +90,6 @@ public class LegacyBrigadierServer implements DedicatedServerModInitializer {
 			} catch (IOException ex) {
 				ex.printStackTrace();
 			}
-			e.printStackTrace();
-		}
-	}
-
-	public static Field ENTITY_MAP;
-	static {
-		try {
-			ENTITY_MAP = EntityRegistry.class.getDeclaredField("STRING_ID_TO_CLASS");
-			ENTITY_MAP.setAccessible(true);
-		} catch (NoSuchFieldException e) {
-			System.out.println("Couldn't find Entity string ID map :concern:");
 			e.printStackTrace();
 		}
 	}
