@@ -7,6 +7,7 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
+import com.williambl.legacybrigadier.server.StringReaderUtils;
 import com.williambl.legacybrigadier.server.mixinhooks.CommandSourceHooks;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -46,9 +47,7 @@ public class PlayerSelectorArgumentType implements ArgumentType<PlayerSelector> 
 
     @Override
     public PlayerSelector parse(StringReader reader) {
-        char first = reader.read(); //evil hack to force it to recognise '@' as a valid character
-        String selector = first + reader.readUnquotedString();
-        System.out.println(selector);
+        String selector = StringReaderUtils.readTargetSelector(reader);
         return new PlayerSelector(selector);
     }
 
