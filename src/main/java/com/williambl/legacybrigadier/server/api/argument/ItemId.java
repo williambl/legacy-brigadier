@@ -11,13 +11,13 @@ public class ItemId {
     private final int numericId;
     private final Id id;
 
-    public ItemId(int numericId) {
+    ItemId(int numericId) {
         this.numericId = numericId;
         ItemType itemType = Registries.ITEM_TYPE.getBySerialisedId(numericId);
         this.id = itemType == null ? new Id("") : Registries.ITEM_TYPE.getId(itemType);
     }
 
-    public ItemId(String idString) {
+    ItemId(String idString) {
         this.id = new Id(idString);
         ItemType itemType = Registries.ITEM_TYPE.getById(id);
         if (itemType != null) {
@@ -31,6 +31,10 @@ public class ItemId {
         }
     }
 
+    /**
+     * Get the numeric id of the item.
+     * @return the numeric id of the item.
+     */
     public int getNumericId() {
         return numericId;
     }

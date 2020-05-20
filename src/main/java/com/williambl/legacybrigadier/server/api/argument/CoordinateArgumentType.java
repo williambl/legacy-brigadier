@@ -21,10 +21,20 @@ public class CoordinateArgumentType implements ArgumentType<Coordinate> {
     private static final Collection<String> EXAMPLES = Arrays.asList("0 0 0", "~ ~ ~", "1 2 3");
     public static final SimpleCommandExceptionType INCOMPLETE_EXCEPTION = new SimpleCommandExceptionType(new LiteralMessage("Incomplete position"));
 
+    /**
+     * Create a new Coordinate argument.
+     * @return a CoordinateArgumentType instance.
+     */
     public static CoordinateArgumentType coordinate() {
         return new CoordinateArgumentType();
     }
 
+    /**
+     * Get the coordinate from an argument.
+     * @param context the command context.
+     * @param name the argument name.
+     * @return the {@link Coordinate}
+     */
     public static Coordinate getCoordinate(final CommandContext<?> context, final String name) {
         return context.getArgument(name, Coordinate.class);
     }

@@ -12,12 +12,17 @@ public class Coordinate {
     final CoordinatePart y;
     final CoordinatePart z;
 
-    public Coordinate(CoordinatePart x, CoordinatePart y, CoordinatePart z) {
+    Coordinate(CoordinatePart x, CoordinatePart y, CoordinatePart z) {
         this.x = x;
         this.y = y;
         this.z = z;
     }
 
+    /**
+     * Get the {@link Vec3i} of the absolute position represented by this Coordinate.
+     * @param commandSource the commandSource whose position will be used to resolve relative coordinates.
+     * @return the {@link Vec3i} of the position.
+     */
     public Vec3i getVec3i(CommandSourceHooks commandSource) {
         Vec3i sourceCoords = commandSource.getPosition();
         return new Vec3i(resolve(x, sourceCoords.x), resolve(y, sourceCoords.y), resolve(z, sourceCoords.z));

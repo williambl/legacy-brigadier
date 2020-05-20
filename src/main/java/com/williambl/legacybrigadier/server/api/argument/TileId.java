@@ -11,13 +11,13 @@ public class TileId {
     private final int numericId;
     private final Id id;
 
-    public TileId(int numericId) {
+    TileId(int numericId) {
         this.numericId = numericId;
         Tile itemType = Registries.TILE.getBySerialisedId(numericId);
         this.id = itemType == null ? new Id("") : Registries.TILE.getId(itemType);
     }
 
-    public TileId(String idString) {
+    TileId(String idString) {
         this.id = new Id(idString);
         Tile tile = Registries.TILE.getById(id);
         if (tile != null) {
@@ -31,6 +31,10 @@ public class TileId {
         }
     }
 
+    /**
+     * Get the numeric id of the item.
+     * @return the numeric id of the item.
+     */
     public int getNumericId() {
         return numericId;
     }

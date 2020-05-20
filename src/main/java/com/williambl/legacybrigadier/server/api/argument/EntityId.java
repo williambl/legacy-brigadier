@@ -7,10 +7,14 @@ import net.fabricmc.api.Environment;
 public class EntityId {
     private final String id;
 
-    public EntityId(String id) {
+    EntityId(String id) {
         this.id = id;
     }
 
+    /**
+     * Get the id of the entity.
+     * @return the id, as a {@link String}.
+     */
     public String getId() {
         return id;
     }

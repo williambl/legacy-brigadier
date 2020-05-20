@@ -45,6 +45,12 @@ public class PermissionNode {
         return node1.equals(node2);
     }
 
+    /**
+     * The root permission node. Satisfies all nodes, equivalent to having every permission.
+     */
     public static final PermissionNode ROOT = new PermissionNode("*");
+    /**
+     * The operator node. Having this is equivalent to being in the ops file in vanilla mc.
+     */
     public static final PermissionNode OPERATOR = new PermissionNode("minecraft.operator");
 }

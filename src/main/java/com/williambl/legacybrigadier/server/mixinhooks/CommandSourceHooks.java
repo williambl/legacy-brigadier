@@ -30,7 +30,7 @@ public interface CommandSourceHooks {
             return new Vec3i((int)serverPlayer.x, (int)serverPlayer.y, (int)serverPlayer.z);
         }
 
-        return null;
+        return new Vec3i(0, 0, 0);
     }
 
     default MinecraftServer getServer() {

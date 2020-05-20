@@ -16,6 +16,11 @@ public class RequiresPermission implements Predicate<CommandSource> {
         this.node = node;
     }
 
+    /**
+     * Create a predicate that requires the node path given.
+     * @param nodePath the node path that must be satisfied by the {@link CommandSource}
+     * @return the predicate.
+     */
     public static RequiresPermission permission(String nodePath) {
         return new RequiresPermission(new PermissionNode(nodePath));
     }

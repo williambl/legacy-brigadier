@@ -5,6 +5,7 @@ import com.williambl.legacybrigadier.server.mixinhooks.ServerPlayerPacketHandler
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.entity.player.Player;
+import net.minecraft.level.Level;
 import net.minecraft.server.command.CommandSource;
 import net.minecraft.server.network.ServerPlayerPacketHandler;
 
@@ -13,46 +14,53 @@ import java.util.List;
 
 @Environment(EnvType.SERVER)
 public class PlayerSelector {
-    private final String id;
-    private final PlayerIdType type;
+    private final String selectorString;
+    private final PlayerSelectorType type;
 
-    public PlayerSelector(String id, PlayerIdType type) {
-        this.id = id;
-        this.type = type;
-    }
-
-    public PlayerSelector(String id) {
-        this.id = id;
-        switch (id.toLowerCase()) {
+    PlayerSelector(String selectorString) {
+        this.selectorString = selectorString;
+        switch (selectorString.toLowerCase()) {
             case "@a":
-                type = PlayerIdType.A;
+                type = PlayerSelectorType.A;
                 break;
             case "@p":
-                type = PlayerIdType.P;
+                type = PlayerSelectorType.P;
                 break;
             default:
-                type = PlayerIdType.RAW;
+                type = PlayerSelectorType.RAW;
                 break;
         }
     }
 
-    public String getId() {
-        return id;
+    /**
+     * Get the raw selector string.
+     * @return the selector.
+     */
+    public String getSelectorString() {
+        return selectorString;
     }
 
-    public PlayerIdType getType() {
-        return type;
-    }
-
+    /**
+     * Get the names of all players in the same level as the given {@link CommandSource}. If the CommandSource is levelless, all
+     * players in the server are retrieved.
+     * @param commandSource the {@link CommandSource} whose level will be used.
+     * @return the list of player names.
+     */
     public List<String> getPlayerNames(CommandSource commandSource) {
         List<String> result = new ArrayList<>();
         switch (type) {
             case RAW:
-                result.add(id);
+                result.add(selectorString);
                 break;
             case A:
-                List<Player> players = ((CommandSourceHooks)commandSource).getWorld().players;
-                players.forEach(it -> result.add(it.name));
+                Level level = ((CommandSourceHooks)commandSource).getWorld();
+                if (level != null) {
+                    List<Player> players = level.players;
+                    players.forEach(it -> result.add(it.name));
+                } else {
+                    List<Player> players = ((CommandSourceHooks)commandSource).getServer().field_2842.field_578;
+                    players.forEach(it -> result.add(it.name));
+                }
                 break;
             case P:
                 result.add(commandSource.getName());
@@ -61,13 +69,25 @@ public class PlayerSelector {
         return result;
     }
 
+    /**
+     * Get all players in the same level as the given {@link CommandSource}. If the CommandSource is levelless, all
+     * players in the server are retrieved.
+     * @param commandSource the {@link CommandSource} whose level will be used.
+     * @return the list of players.
+     */
     public List<Player> getPlayers(CommandSource commandSource) {
         List<Player> result = new ArrayList<>();
-        List<Player> players = ((CommandSourceHooks)commandSource).getWorld().players;
+        Level level = ((CommandSourceHooks)commandSource).getWorld();
+        List<Player> players;
+        if (level != null) {
+            players = level.players;
+        } else {
+            players = ((CommandSourceHooks)commandSource).getServer().field_2842.field_578;
+        }
         switch (type) {
             case RAW:
                 for (Player player : players) {
-                    if (player.name.equals(id))
+                    if (player.name.equals(selectorString))
                         result.add(player);
                 }
                 break;
@@ -82,7 +102,7 @@ public class PlayerSelector {
         return result;
     }
 
-    public enum PlayerIdType {
+    private enum PlayerSelectorType {
         RAW,
         A,
         P
