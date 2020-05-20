@@ -8,10 +8,7 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.williambl.legacybrigadier.server.api.CommandRegistry;
-import com.williambl.legacybrigadier.server.api.argument.EntityId;
-import com.williambl.legacybrigadier.server.api.argument.ItemId;
-import com.williambl.legacybrigadier.server.api.argument.PlayerSelector;
-import com.williambl.legacybrigadier.server.api.argument.TileId;
+import com.williambl.legacybrigadier.server.api.argument.*;
 import com.williambl.legacybrigadier.server.api.permission.PermissionNode;
 import com.williambl.legacybrigadier.server.mixinhooks.CommandSourceHooks;
 import com.williambl.legacybrigadier.server.network.LegacyBrigadierPluginChannelServer;
@@ -124,18 +121,18 @@ public class LegacyBrigadierServer implements DedicatedServerModInitializer {
 				LiteralArgumentBuilder.<CommandSource>literal("settile")
 						.requires(permission("command.settile"))
 						.then(
-								RequiredArgumentBuilder.<CommandSource, Vec3i>argument("pos", coordinate())
+								RequiredArgumentBuilder.<CommandSource, Coordinate>argument("pos", coordinate())
 										.then(
 												RequiredArgumentBuilder.<CommandSource, TileId>argument("id", tileId())
 														.executes(context -> {
-															Vec3i pos = getCoordinate(context, "pos");
+															Vec3i pos = getCoordinate(context, "pos").getVec3i((CommandSourceHooks) context.getSource());
 															((CommandSourceHooks) context.getSource()).getWorld().setTile(pos.x, pos.y, pos.z, getTileId(context, "id").getNumericId());
 															return 0;
 														})
 														.then(
 																RequiredArgumentBuilder.<CommandSource, Integer>argument("meta", integer())
 																		.executes(context -> {
-																			Vec3i pos = getCoordinate(context, "pos");
+																			Vec3i pos = getCoordinate(context, "pos").getVec3i((CommandSourceHooks) context.getSource());
 																			((CommandSourceHooks) context.getSource()).getWorld().method_201(pos.x, pos.y, pos.z, getTileId(context, "id").getNumericId(), getInteger(context, "meta"));
 																			return 0;
 																		})
@@ -151,9 +148,9 @@ public class LegacyBrigadierServer implements DedicatedServerModInitializer {
 						.then(
 								RequiredArgumentBuilder.<CommandSource, EntityId>argument("id", entityId())
 										.then(
-												RequiredArgumentBuilder.<CommandSource, Vec3i>argument("pos", coordinate())
+												RequiredArgumentBuilder.<CommandSource, Coordinate>argument("pos", coordinate())
 														.executes(context -> {
-															Vec3i pos = getCoordinate(context, "pos");
+															Vec3i pos = getCoordinate(context, "pos").getVec3i((CommandSourceHooks) context.getSource());
 															Level world = ((CommandSourceHooks)context.getSource()).getWorld();
 															Entity entity = EntityRegistry.create(getEntityId(context, "id").getId(), world);
 															entity.setPosition(pos.x, pos.y, pos.z);
