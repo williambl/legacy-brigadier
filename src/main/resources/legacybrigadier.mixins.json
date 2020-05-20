@@ -5,8 +5,7 @@
   "mixins": [
   ],
   "client": [
-    "ChatScreenMixin",
-    "MinecraftAccessor"
+    "ChatScreenMixin"
   ],
   "server": [
     "CommandManagerMixin",

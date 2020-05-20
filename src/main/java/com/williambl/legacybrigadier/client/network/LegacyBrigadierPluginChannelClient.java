@@ -1,7 +1,7 @@
 package com.williambl.legacybrigadier.client.network;
 
+import com.williambl.legacybrigadier.client.LegacyBrigadierClient;
 import com.williambl.legacybrigadier.client.mixinhooks.ChatScreenHooks;
-import com.williambl.legacybrigadier.mixin.MinecraftAccessor;
 import io.github.minecraftcursedlegacy.api.networking.PluginChannel;
 import io.github.minecraftcursedlegacy.api.registry.Id;
 import net.fabricmc.api.EnvType;
@@ -29,7 +29,7 @@ public class LegacyBrigadierPluginChannelClient extends PluginChannel {
     public void onRecieve(PacketHandler packetHandler, byte[] bytes) {
         if (packetHandler instanceof ClientPlayNetworkHandler) {
             List<String> completions = bytesToStrings(bytes);
-            Screen screen = MinecraftAccessor.getInstance().currentScreen;
+            Screen screen = LegacyBrigadierClient.MINECRAFT.currentScreen;
             if (screen instanceof ChatScreenHooks) {
                 ChatScreenHooks chatScreen = (ChatScreenHooks) screen;
                 if (completions.size() > 0) {

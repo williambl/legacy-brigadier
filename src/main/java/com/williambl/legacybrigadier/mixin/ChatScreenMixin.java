@@ -48,7 +48,7 @@ public abstract class ChatScreenMixin implements ChatScreenHooks {
                     System.out.println(currentCompletion % completions.size());
                     System.out.println();
                 }
-                LegacyBrigadierClient.CHANNEL.send(getMessage().replaceFirst("/", "").getBytes(StandardCharsets.UTF_8), MinecraftAccessor.getInstance());
+                LegacyBrigadierClient.CHANNEL.send(getMessage().replaceFirst("/", "").getBytes(StandardCharsets.UTF_8), LegacyBrigadierClient.MINECRAFT);
                 break;
 
             case Keyboard.KEY_UP:
