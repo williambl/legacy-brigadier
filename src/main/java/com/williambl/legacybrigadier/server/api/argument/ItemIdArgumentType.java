@@ -11,6 +11,8 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import com.williambl.legacybrigadier.server.StringReaderUtils;
 import io.github.minecraftcursedlegacy.api.registry.Id;
 import io.github.minecraftcursedlegacy.api.registry.Registries;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -19,6 +21,7 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
+@Environment(EnvType.SERVER)
 public class ItemIdArgumentType implements ArgumentType<ItemId> {
 
     private static final Collection<String> EXAMPLES = Arrays.asList("0", "2", "32");

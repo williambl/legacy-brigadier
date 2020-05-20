@@ -1,7 +1,11 @@
 package com.williambl.legacybrigadier.server.api.permission;
 
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+
 import java.util.List;
 
+@Environment(EnvType.SERVER)
 public class PermissionNode {
 
     private final String path;

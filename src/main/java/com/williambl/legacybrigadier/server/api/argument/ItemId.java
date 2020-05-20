@@ -2,8 +2,11 @@ package com.williambl.legacybrigadier.server.api.argument;
 
 import io.github.minecraftcursedlegacy.api.registry.Id;
 import io.github.minecraftcursedlegacy.api.registry.Registries;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.item.ItemType;
 
+@Environment(EnvType.SERVER)
 public class ItemId {
     private final int numericId;
     private final Id id;
