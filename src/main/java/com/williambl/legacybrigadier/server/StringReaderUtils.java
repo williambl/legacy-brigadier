@@ -17,10 +17,6 @@ public final class StringReaderUtils {
         return StringReader.isAllowedInUnquotedString(c) || c == ':';
     }
 
-    private static boolean isAllowedInCoordinate(final char c) {
-        return (c >= '0' && c <= '9') || c == '~';
-    }
-
     public static String readTargetSelector(StringReader reader) {
         final int start = reader.getCursor();
         while (reader.canRead() && isAllowedInTargetSelector(reader.peek())) {
@@ -38,7 +34,6 @@ public final class StringReaderUtils {
     }
 
     public static Coordinate.CoordinatePart readCoordinatePart(StringReader reader) throws CommandSyntaxException {
-        final int start = reader.getCursor();
         boolean isRelative = false;
         if (reader.peek() == '~') {
             isRelative = true;
