@@ -7,6 +7,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.server.command.CommandSource;
 
+import javax.annotation.Nonnull;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -41,6 +42,7 @@ public final class CommandRegistry {
      * @param command the {@link CommandNode} to find help text for.
      * @return the help text, or "No help available" if no help text has been registered.
      */
+    @Nonnull
     public static String getHelp(CommandNode<CommandSource> command) {
         if (!helpMap.containsKey(command))
             return "No help available";

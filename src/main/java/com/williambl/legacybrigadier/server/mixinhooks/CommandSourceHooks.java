@@ -1,7 +1,7 @@
 package com.williambl.legacybrigadier.server.mixinhooks;
 
 import com.williambl.legacybrigadier.mixin.ServerGUIAccessor;
-import com.williambl.legacybrigadier.server.LegacyBrigadierServer;
+import com.williambl.legacybrigadier.server.api.permission.PermissionManager;
 import com.williambl.legacybrigadier.server.api.permission.PermissionNode;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -9,6 +9,7 @@ import net.minecraft.entity.player.ServerPlayer;
 import net.minecraft.level.Level;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.ServerGUI;
+import net.minecraft.server.command.CommandSource;
 import net.minecraft.server.network.ServerPlayerPacketHandler;
 import net.minecraft.util.Vec3i;
 
@@ -44,13 +45,9 @@ public interface CommandSourceHooks {
     }
 
     default List<PermissionNode> getPermissions() {
-        if (this instanceof MinecraftServer || this instanceof ServerGUI) {
+        if (this instanceof MinecraftServer || this instanceof ServerGUI)
             return getAllPermissions();
-        } else if (this instanceof ServerPlayerPacketHandler){
-            ServerPlayer serverPlayer = ((ServerPlayerPacketHandlerHooks)this).getPlayer();
-            return LegacyBrigadierServer.permissionsMap.get(serverPlayer.name);
-        }
-        return new ArrayList<>();
+        return PermissionManager.getNodesForCommandSource((CommandSource) this);
     }
 
     default List<PermissionNode> getAllPermissions() {

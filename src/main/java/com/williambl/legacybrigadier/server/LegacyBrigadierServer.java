@@ -1,15 +1,11 @@
 package com.williambl.legacybrigadier.server;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.reflect.TypeToken;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.williambl.legacybrigadier.server.api.CommandRegistry;
 import com.williambl.legacybrigadier.server.api.argument.*;
-import com.williambl.legacybrigadier.server.api.permission.PermissionNode;
 import com.williambl.legacybrigadier.server.mixinhooks.CommandSourceHooks;
 import com.williambl.legacybrigadier.server.network.LegacyBrigadierPluginChannelServer;
 import io.github.minecraftcursedlegacy.api.networking.PluginChannelRegistry;
@@ -31,15 +27,7 @@ import net.minecraft.tile.Tile;
 import net.minecraft.tile.material.Material;
 import net.minecraft.util.Vec3i;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 import static com.mojang.brigadier.arguments.IntegerArgumentType.getInteger;
 import static com.mojang.brigadier.arguments.IntegerArgumentType.integer;
@@ -66,30 +54,6 @@ public class LegacyBrigadierServer implements DedicatedServerModInitializer {
 
 	public static final Logger LOGGER = Logger.getLogger("Minecraft");
 
-	public static final Map<String, List<PermissionNode>> permissionsMap = new HashMap<>();
-	private static final Gson GSON = new GsonBuilder().create();
-	static {
-		File permissionsFile = new File("config/legacybrigadier/permissions.json");
-		try {
-			TypeToken<Map<String, List<String>>> typeToken = new TypeToken<Map<String, List<String>>>() {};
-			Map<String, List<String>> map = GSON.fromJson(new FileReader(permissionsFile), typeToken.getType());
-
-			map.forEach((player, perms) ->
-					permissionsMap.put(player, perms.stream().map(PermissionNode::new).collect(Collectors.toList()))
-			);
-		} catch (FileNotFoundException e) {
-			try {
-				if (permissionsFile.createNewFile()) {
-					System.out.println("Created perms file.");
-				} else {
-					System.out.println("Couldn't create perms file!");
-				}
-			} catch (IOException ex) {
-				ex.printStackTrace();
-			}
-			e.printStackTrace();
-		}
-	}
 
 	@Override
 	public void onInitializeServer() {
