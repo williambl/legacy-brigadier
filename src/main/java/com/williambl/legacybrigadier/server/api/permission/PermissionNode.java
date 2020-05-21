@@ -3,6 +3,7 @@ package com.williambl.legacybrigadier.server.api.permission;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 
+import java.util.Objects;
 import java.util.Set;
 
 @Environment(EnvType.SERVER)
@@ -54,4 +55,17 @@ public class PermissionNode {
      * The operator node. Having this is equivalent to being in the ops file in vanilla mc.
      */
     public static final PermissionNode OPERATOR = new PermissionNode("minecraft.operator");
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        PermissionNode that = (PermissionNode) o;
+        return path.equals(that.path);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(path);
+    }
 }

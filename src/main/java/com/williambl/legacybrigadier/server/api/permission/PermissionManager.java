@@ -87,6 +87,43 @@ public final class PermissionManager {
         return tryUpdatePermissionsFile();
     }
 
+    /**
+     * Remove a node associated with the player given.
+     * @param player the player which will lose the node.
+     * @param node the node to remove.
+     * @return whether the node was successfully removed.
+     */
+    public static boolean removeNodeFromPlayer(Player player, PermissionNode node) {
+        return removeNodeFromName(player.name, node);
+    }
+
+    /**
+     * Remove a node associated with the command source given.
+     * @param source the command source which will lose the node.
+     * @param node the node to remove.
+     * @return whether the node was successfully removed.
+     */
+    public static boolean removeNodeFromCommandSource(CommandSource source, PermissionNode node) {
+        return removeNodeFromName(source.getName(), node);
+    }
+
+    /**
+     * Remove a node associated with the name given.
+     * @param name the name which will lose the node.
+     * @param node the node to remove.
+     * @return whether the node was successfully removed.
+     */
+    public static boolean removeNodeFromName(String name, PermissionNode node) {
+        final Set<PermissionNode> nodes = permissionsMap.get(name);
+        if (nodes == null) {
+            final Set<PermissionNode> newNodes = new HashSet<>();
+            permissionsMap.put(name, newNodes);
+        } else {
+            nodes.remove(node);
+        }
+        return tryUpdatePermissionsFile();
+    }
+
     private static final Map<String, Set<PermissionNode>> permissionsMap = new HashMap<>();
     private static final Gson GSON = new GsonBuilder().create();
     private static final String permissionsFilePath = "config/legacybrigadier/permissions.json";
@@ -101,12 +138,12 @@ public final class PermissionManager {
             loadPermissions(permissionsFile);
         } catch (FileNotFoundException e) {
             try {
-                if (permissionsFile.createNewFile()) {
-                    System.out.println("Created perms file.");
-                } else {
-                    System.out.println("Couldn't create perms file!");
-                }
+                final FileWriter writer = new FileWriter(permissionsFile);
+                writer.write("{}");
+                writer.close();
+                System.out.println("Created perms file.");
             } catch (IOException ex) {
+                System.out.println("Couldn't create perms file!");
                 ex.printStackTrace();
             }
         }
@@ -138,6 +175,7 @@ public final class PermissionManager {
         );
         final FileWriter writer = new FileWriter(file);
         writer.write(GSON.toJson(stringMap, string2StringSetType.getType()));
+        writer.close();
     }
 
 }

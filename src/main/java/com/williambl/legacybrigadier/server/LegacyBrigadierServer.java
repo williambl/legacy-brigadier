@@ -6,6 +6,8 @@ import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.williambl.legacybrigadier.server.api.CommandRegistry;
 import com.williambl.legacybrigadier.server.api.argument.*;
+import com.williambl.legacybrigadier.server.api.permission.PermissionManager;
+import com.williambl.legacybrigadier.server.api.permission.PermissionNode;
 import com.williambl.legacybrigadier.server.mixinhooks.CommandSourceHooks;
 import com.williambl.legacybrigadier.server.network.LegacyBrigadierPluginChannelServer;
 import io.github.minecraftcursedlegacy.api.networking.PluginChannelRegistry;
@@ -27,14 +29,14 @@ import net.minecraft.tile.Tile;
 import net.minecraft.tile.material.Material;
 import net.minecraft.util.Vec3i;
 
+import java.util.Set;
 import java.util.logging.Logger;
 
 import static com.mojang.brigadier.arguments.IntegerArgumentType.getInteger;
 import static com.mojang.brigadier.arguments.IntegerArgumentType.integer;
 import static com.mojang.brigadier.arguments.LongArgumentType.getLong;
 import static com.mojang.brigadier.arguments.LongArgumentType.longArg;
-import static com.mojang.brigadier.arguments.StringArgumentType.getString;
-import static com.mojang.brigadier.arguments.StringArgumentType.greedyString;
+import static com.mojang.brigadier.arguments.StringArgumentType.*;
 import static com.williambl.legacybrigadier.server.api.argument.CoordinateArgumentType.coordinate;
 import static com.williambl.legacybrigadier.server.api.argument.CoordinateArgumentType.getCoordinate;
 import static com.williambl.legacybrigadier.server.api.argument.EntityIdArgumentType.entityId;
@@ -278,6 +280,84 @@ public class LegacyBrigadierServer implements DedicatedServerModInitializer {
 												}))
 						),
 				"Set or get the time"
+		);
+
+		CommandRegistry.register(
+				LiteralArgumentBuilder.<CommandSource>literal("permissions")
+						.requires(permission("command.permissions"))
+				.then(
+						LiteralArgumentBuilder.<CommandSource>literal("get")
+						.then(
+								RequiredArgumentBuilder.<CommandSource, PlayerSelector>argument("player", player())
+								.executes(context -> {
+									final StringBuilder builder = new StringBuilder();
+									for (String playerName : getPlayer(context, "player").getPlayerNames(context.getSource())) {
+										final Set<PermissionNode> nodes = PermissionManager.getNodesForName(playerName);
+										builder.append(playerName);
+										builder.append(" has permissions:");
+										for (PermissionNode node : nodes) {
+											builder.append(" ");
+											builder.append(node.toString());
+										}
+										builder.append("\n");
+									}
+									builder.deleteCharAt(builder.length()-1); // Remove last newline
+									context.getSource().sendFeedback(builder.toString());
+									return 0;
+								})
+						)
+				)
+				.then(
+						LiteralArgumentBuilder.<CommandSource>literal("add")
+						.then(
+								RequiredArgumentBuilder.<CommandSource, PlayerSelector>argument("player", player())
+								.then(
+										RequiredArgumentBuilder.<CommandSource, String>argument("node", string())
+										.executes(context -> {
+											final StringBuilder builder = new StringBuilder();
+											final PermissionNode node = new PermissionNode(getString(context, "node"));
+											for (String playerName : getPlayer(context, "player").getPlayerNames(context.getSource())) {
+												final boolean success = PermissionManager.addNodeToName(playerName, node);
+												builder.append(success ? "Added" : "Failed to add");
+												builder.append(" node ");
+												builder.append(node.toString());
+												builder.append(" to ");
+												builder.append(playerName);
+												builder.append("\n");
+											}
+											builder.deleteCharAt(builder.length()-1); // Remove last newline
+											context.getSource().sendFeedback(builder.toString());
+											return 0;
+										})
+								)
+						)
+				)
+						.then(
+								LiteralArgumentBuilder.<CommandSource>literal("remove")
+										.then(
+												RequiredArgumentBuilder.<CommandSource, PlayerSelector>argument("player", player())
+														.then(
+																RequiredArgumentBuilder.<CommandSource, String>argument("node", string())
+																		.executes(context -> {
+																			final StringBuilder builder = new StringBuilder();
+																			final PermissionNode node = new PermissionNode(getString(context, "node"));
+																			for (String playerName : getPlayer(context, "player").getPlayerNames(context.getSource())) {
+																				final boolean success = PermissionManager.removeNodeFromName(playerName, node);
+																				builder.append(success ? "Removed" : "Failed to remove");
+																				builder.append(" node ");
+																				builder.append(node.toString());
+																				builder.append(" from ");
+																				builder.append(playerName);
+																				builder.append("\n");
+																			}
+																			builder.deleteCharAt(builder.length()-1); // Remove last newline
+																			context.getSource().sendFeedback(builder.toString());
+																			return 0;
+																		})
+														)
+										)
+				),
+				"Query or add permissions to players."
 		);
 
 	}
