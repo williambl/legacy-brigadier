@@ -31,6 +31,8 @@ import java.util.logging.Logger;
 
 import static com.mojang.brigadier.arguments.IntegerArgumentType.getInteger;
 import static com.mojang.brigadier.arguments.IntegerArgumentType.integer;
+import static com.mojang.brigadier.arguments.LongArgumentType.getLong;
+import static com.mojang.brigadier.arguments.LongArgumentType.longArg;
 import static com.mojang.brigadier.arguments.StringArgumentType.getString;
 import static com.mojang.brigadier.arguments.StringArgumentType.greedyString;
 import static com.williambl.legacybrigadier.server.api.argument.CoordinateArgumentType.coordinate;
@@ -233,9 +235,29 @@ public class LegacyBrigadierServer implements DedicatedServerModInitializer {
 						.requires(isWorldly())
 						.then(
 								LiteralArgumentBuilder.<CommandSource>literal("set")
-										.then(RequiredArgumentBuilder.<CommandSource, Integer>argument("time", integer(0))
+										.then(RequiredArgumentBuilder.<CommandSource, Long>argument("time", longArg(0))
 												.executes(context -> {
-													((CommandSourceHooks)context.getSource()).getWorld().setLevelTime(getInteger(context, "time"));
+													((CommandSourceHooks)context.getSource()).getWorld().setLevelTime(getLong(context, "time"));
+													return 0;
+												}))
+										.then(LiteralArgumentBuilder.<CommandSource>literal("day")
+												.executes(context -> {
+													((CommandSourceHooks)context.getSource()).getWorld().setLevelTime(0);
+													return 0;
+												}))
+										.then(LiteralArgumentBuilder.<CommandSource>literal("noon")
+												.executes(context -> {
+													((CommandSourceHooks)context.getSource()).getWorld().setLevelTime(6000);
+													return 0;
+												}))
+										.then(LiteralArgumentBuilder.<CommandSource>literal("night")
+												.executes(context -> {
+													((CommandSourceHooks)context.getSource()).getWorld().setLevelTime(12000);
+													return 0;
+												}))
+										.then(LiteralArgumentBuilder.<CommandSource>literal("midnight")
+												.executes(context -> {
+													((CommandSourceHooks)context.getSource()).getWorld().setLevelTime(18000);
 													return 0;
 												}))
 						)
@@ -245,8 +267,18 @@ public class LegacyBrigadierServer implements DedicatedServerModInitializer {
 											context.getSource().sendFeedback(Long.toString(((CommandSourceHooks)context.getSource()).getWorld().getLevelTime()));
 											return 0;
 										})
+						)
+						.then(
+								LiteralArgumentBuilder.<CommandSource>literal("add")
+										.then(RequiredArgumentBuilder.<CommandSource, Long>argument("time", longArg())
+												.executes(context -> {
+													Level level = ((CommandSourceHooks)context.getSource()).getWorld();
+													level.setLevelTime(level.getLevelTime()+getLong(context, "time"));
+													return 0;
+												}))
 						),
 				"Set or get the time"
 		);
+
 	}
 }
