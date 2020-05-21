@@ -14,13 +14,14 @@ public class PermissionNode {
         this.path = path;
     }
 
-    String getPath() {
+    @Override
+    public String toString() {
         return path;
     }
 
     public boolean satisfies(PermissionNode nodeToCheck) {
-        String[] pathElements = getPath().split("\\.");
-        String[] checkPathElements = nodeToCheck.getPath().split("\\.");
+        String[] pathElements = this.toString().split("\\.");
+        String[] checkPathElements = nodeToCheck.toString().split("\\.");
 
         for (int i = 0; i < checkPathElements.length; i++) {
             String node1 = i < pathElements.length ? pathElements[i] : "*";

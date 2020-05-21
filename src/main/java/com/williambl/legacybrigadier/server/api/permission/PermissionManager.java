@@ -9,14 +9,8 @@ import net.minecraft.entity.player.Player;
 import net.minecraft.server.command.CommandSource;
 
 import javax.annotation.Nonnull;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.io.*;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Environment(EnvType.SERVER)
@@ -29,10 +23,7 @@ public final class PermissionManager {
      */
     @Nonnull
     public static List<PermissionNode> getNodesForPlayer(Player player) {
-        final List<PermissionNode> nodes = permissionsMap.get(player.name);
-        if (nodes == null)
-            return Collections.emptyList();
-        return nodes;
+        return getNodesForName(player.name);
     }
 
     /**
@@ -42,10 +33,7 @@ public final class PermissionManager {
      */
     @Nonnull
     public static List<PermissionNode> getNodesForCommandSource(CommandSource source) {
-        final List<PermissionNode> nodes = permissionsMap.get(source.getName());
-        if (nodes == null)
-            return Collections.emptyList();
-        return nodes;
+        return getNodesForName(source.getName());
     }
 
     /**
@@ -61,9 +49,48 @@ public final class PermissionManager {
         return nodes;
     }
 
+    /**
+     * Add a node associated with the player given.
+     * @param player the player which will be given a new node.
+     * @param node the node to add.
+     * @return whether the node was successfully added.
+     */
+    public static boolean addNodeToPlayer(Player player, PermissionNode node) {
+        return addNodeToName(player.name, node);
+    }
+
+    /**
+     * Add a node associated with the command source given.
+     * @param source the command source which will be given a new node.
+     * @param node the node to add.
+     * @return whether the node was successfully added.
+     */
+    public static boolean addNodeToCommandSource(CommandSource source, PermissionNode node) {
+        return addNodeToName(source.getName(), node);
+    }
+
+    /**
+     * Add a node associated with the name given.
+     * @param name the name which will be given a new node.
+     * @param node the node to add.
+     * @return whether the node was successfully added.
+     */
+    public static boolean addNodeToName(String name, PermissionNode node) {
+        final List<PermissionNode> nodes = permissionsMap.get(name);
+        if (nodes == null) {
+            final List<PermissionNode> newNodes = new ArrayList<>();
+            newNodes.add(node);
+            permissionsMap.put(name, newNodes);
+        } else {
+            nodes.add(node);
+        }
+        return tryUpdatePermissionsFile();
+    }
+
     private static final Map<String, List<PermissionNode>> permissionsMap = new HashMap<>();
     private static final Gson GSON = new GsonBuilder().create();
     private static final String permissionsFilePath = "config/legacybrigadier/permissions.json";
+    private static final TypeToken<Map<String, List<String>>> string2StringListType = new TypeToken<Map<String, List<String>>>() {};
     static {
         setupPermissionManager();
     }
@@ -71,12 +98,7 @@ public final class PermissionManager {
     private static void setupPermissionManager() {
         final File permissionsFile = new File(permissionsFilePath);
         try {
-            final TypeToken<Map<String, List<String>>> typeToken = new TypeToken<Map<String, List<String>>>() {};
-            final Map<String, List<String>> stringMap = GSON.fromJson(new FileReader(permissionsFile), typeToken.getType());
-
-            stringMap.forEach((player, perms) ->
-                    permissionsMap.put(player, perms.stream().map(PermissionNode::new).collect(Collectors.toList()))
-            );
+            loadPermissions(permissionsFile);
         } catch (FileNotFoundException e) {
             try {
                 if (permissionsFile.createNewFile()) {
@@ -88,6 +110,34 @@ public final class PermissionManager {
                 ex.printStackTrace();
             }
         }
+    }
+
+    private static boolean tryUpdatePermissionsFile() {
+        final File permissionsFile = new File(permissionsFilePath);
+        try {
+            savePermissions(permissionsFile);
+            return true;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    private static void loadPermissions(File file) throws FileNotFoundException {
+        final Map<String, List<String>> stringMap = GSON.fromJson(new FileReader(file), string2StringListType.getType());
+        PermissionManager.permissionsMap.clear();
+        stringMap.forEach((names, perms) ->
+                PermissionManager.permissionsMap.put(names, perms.stream().map(PermissionNode::new).collect(Collectors.toList()))
+        );
+    }
+
+    private static void savePermissions(File file) throws IOException {
+        final Map<String, List<String>> stringMap = new HashMap<>();
+        PermissionManager.permissionsMap.forEach((name, perms) ->
+                stringMap.put(name, perms.stream().map(PermissionNode::toString).collect(Collectors.toList()))
+        );
+        final FileWriter writer = new FileWriter(file);
+        writer.write(GSON.toJson(stringMap, string2StringListType.getType()));
     }
 
 }
