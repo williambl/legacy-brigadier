@@ -43,7 +43,8 @@ import static com.williambl.legacybrigadier.server.api.argument.PlayerSelectorAr
 import static com.williambl.legacybrigadier.server.api.argument.PlayerSelectorArgumentType.player;
 import static com.williambl.legacybrigadier.server.api.argument.TileIdArgumentType.getTileId;
 import static com.williambl.legacybrigadier.server.api.argument.TileIdArgumentType.tileId;
-import static com.williambl.legacybrigadier.server.api.permission.RequiresPermission.permission;
+import static com.williambl.legacybrigadier.server.api.predicates.HasPermission.permission;
+import static com.williambl.legacybrigadier.server.api.predicates.IsWorldly.isWorldly;
 
 @Environment(EnvType.SERVER)
 public class LegacyBrigadierServer implements DedicatedServerModInitializer {
@@ -84,6 +85,7 @@ public class LegacyBrigadierServer implements DedicatedServerModInitializer {
 		CommandRegistry.register(
 				LiteralArgumentBuilder.<CommandSource>literal("settile")
 						.requires(permission("command.settile"))
+						.requires(isWorldly())
 						.then(
 								RequiredArgumentBuilder.<CommandSource, Coordinate>argument("pos", coordinate())
 										.then(
@@ -109,6 +111,7 @@ public class LegacyBrigadierServer implements DedicatedServerModInitializer {
 		CommandRegistry.register(
 				LiteralArgumentBuilder.<CommandSource>literal("summon")
 						.requires(permission("command.summon"))
+						.requires(isWorldly())
 						.then(
 								RequiredArgumentBuilder.<CommandSource, EntityId>argument("id", entityId())
 										.then(
@@ -226,22 +229,23 @@ public class LegacyBrigadierServer implements DedicatedServerModInitializer {
 
 		CommandRegistry.register(
 				LiteralArgumentBuilder.<CommandSource>literal("time")
-				.requires(permission("command.time"))
-				.then(
-						LiteralArgumentBuilder.<CommandSource>literal("set")
-						.then(RequiredArgumentBuilder.<CommandSource, Integer>argument("time", integer(0))
-						.executes(context -> {
-							((CommandSourceHooks)context.getSource()).getWorld().setLevelTime(getInteger(context, "time"));
-							return 0;
-						}))
-				)
-				.then(
-						LiteralArgumentBuilder.<CommandSource>literal("get")
-						.executes(context -> {
-							context.getSource().sendFeedback(Long.toString(((CommandSourceHooks)context.getSource()).getWorld().getLevelTime()));
-							return 0;
-						})
-				),
+						.requires(permission("command.time"))
+						.requires(isWorldly())
+						.then(
+								LiteralArgumentBuilder.<CommandSource>literal("set")
+										.then(RequiredArgumentBuilder.<CommandSource, Integer>argument("time", integer(0))
+												.executes(context -> {
+													((CommandSourceHooks)context.getSource()).getWorld().setLevelTime(getInteger(context, "time"));
+													return 0;
+												}))
+						)
+						.then(
+								LiteralArgumentBuilder.<CommandSource>literal("get")
+										.executes(context -> {
+											context.getSource().sendFeedback(Long.toString(((CommandSourceHooks)context.getSource()).getWorld().getLevelTime()));
+											return 0;
+										})
+						),
 				"Set or get the time"
 		);
 	}
