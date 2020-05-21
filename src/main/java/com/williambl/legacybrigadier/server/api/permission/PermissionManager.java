@@ -22,7 +22,7 @@ public final class PermissionManager {
      * @return a list of the player's permission nodes.
      */
     @Nonnull
-    public static List<PermissionNode> getNodesForPlayer(Player player) {
+    public static Set<PermissionNode> getNodesForPlayer(Player player) {
         return getNodesForName(player.name);
     }
 
@@ -32,7 +32,7 @@ public final class PermissionManager {
      * @return a list of the source's permission nodes.
      */
     @Nonnull
-    public static List<PermissionNode> getNodesForCommandSource(CommandSource source) {
+    public static Set<PermissionNode> getNodesForCommandSource(CommandSource source) {
         return getNodesForName(source.getName());
     }
 
@@ -42,10 +42,10 @@ public final class PermissionManager {
      * @return a list of the permission nodes.
      */
     @Nonnull
-    public static List<PermissionNode> getNodesForName(String name) {
-        final List<PermissionNode> nodes = permissionsMap.get(name);
+    public static Set<PermissionNode> getNodesForName(String name) {
+        final Set<PermissionNode> nodes = permissionsMap.get(name);
         if (nodes == null)
-            return Collections.emptyList();
+            return Collections.emptySet();
         return nodes;
     }
 
@@ -76,9 +76,9 @@ public final class PermissionManager {
      * @return whether the node was successfully added.
      */
     public static boolean addNodeToName(String name, PermissionNode node) {
-        final List<PermissionNode> nodes = permissionsMap.get(name);
+        final Set<PermissionNode> nodes = permissionsMap.get(name);
         if (nodes == null) {
-            final List<PermissionNode> newNodes = new ArrayList<>();
+            final Set<PermissionNode> newNodes = new HashSet<>();
             newNodes.add(node);
             permissionsMap.put(name, newNodes);
         } else {
@@ -87,10 +87,10 @@ public final class PermissionManager {
         return tryUpdatePermissionsFile();
     }
 
-    private static final Map<String, List<PermissionNode>> permissionsMap = new HashMap<>();
+    private static final Map<String, Set<PermissionNode>> permissionsMap = new HashMap<>();
     private static final Gson GSON = new GsonBuilder().create();
     private static final String permissionsFilePath = "config/legacybrigadier/permissions.json";
-    private static final TypeToken<Map<String, List<String>>> string2StringListType = new TypeToken<Map<String, List<String>>>() {};
+    private static final TypeToken<Map<String, Set<String>>> string2StringSetType = new TypeToken<Map<String, Set<String>>>() {};
     static {
         setupPermissionManager();
     }
@@ -124,20 +124,20 @@ public final class PermissionManager {
     }
 
     private static void loadPermissions(File file) throws FileNotFoundException {
-        final Map<String, List<String>> stringMap = GSON.fromJson(new FileReader(file), string2StringListType.getType());
+        final Map<String, Set<String>> stringMap = GSON.fromJson(new FileReader(file), string2StringSetType.getType());
         PermissionManager.permissionsMap.clear();
         stringMap.forEach((names, perms) ->
-                PermissionManager.permissionsMap.put(names, perms.stream().map(PermissionNode::new).collect(Collectors.toList()))
+                PermissionManager.permissionsMap.put(names, perms.stream().map(PermissionNode::new).collect(Collectors.toSet()))
         );
     }
 
     private static void savePermissions(File file) throws IOException {
-        final Map<String, List<String>> stringMap = new HashMap<>();
+        final Map<String, Set<String>> stringMap = new HashMap<>();
         PermissionManager.permissionsMap.forEach((name, perms) ->
-                stringMap.put(name, perms.stream().map(PermissionNode::toString).collect(Collectors.toList()))
+                stringMap.put(name, perms.stream().map(PermissionNode::toString).collect(Collectors.toSet()))
         );
         final FileWriter writer = new FileWriter(file);
-        writer.write(GSON.toJson(stringMap, string2StringListType.getType()));
+        writer.write(GSON.toJson(stringMap, string2StringSetType.getType()));
     }
 
 }

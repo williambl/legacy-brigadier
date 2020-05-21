@@ -13,8 +13,8 @@ import net.minecraft.server.command.CommandSource;
 import net.minecraft.server.network.ServerPlayerPacketHandler;
 import net.minecraft.util.Vec3i;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 @Environment(EnvType.SERVER)
 public interface CommandSourceHooks {
@@ -44,16 +44,16 @@ public interface CommandSourceHooks {
         return null;
     }
 
-    default List<PermissionNode> getPermissions() {
+    default Set<PermissionNode> getPermissions() {
         if (this instanceof MinecraftServer || this instanceof ServerGUI)
             return getAllPermissions();
         return PermissionManager.getNodesForCommandSource((CommandSource) this);
     }
 
-    default List<PermissionNode> getAllPermissions() {
-        List<PermissionNode> list = new ArrayList<>();
-        list.add(PermissionNode.ROOT);
-        return list;
+    default Set<PermissionNode> getAllPermissions() {
+        Set<PermissionNode> set = new HashSet<>();
+        set.add(PermissionNode.ROOT);
+        return set;
     }
 
     default boolean satisfiesNode(PermissionNode nodeToCheck) {

@@ -3,7 +3,7 @@ package com.williambl.legacybrigadier.server.api.permission;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 
-import java.util.List;
+import java.util.Set;
 
 @Environment(EnvType.SERVER)
 public class PermissionNode {
@@ -32,7 +32,7 @@ public class PermissionNode {
         return true;
     }
 
-    public boolean isSatisfiedBy(List<PermissionNode> nodesToCheck) {
+    public boolean isSatisfiedBy(Set<PermissionNode> nodesToCheck) {
         for (PermissionNode nodeToCheck : nodesToCheck) {
             if (nodeToCheck.satisfies(this))
                 return true;
