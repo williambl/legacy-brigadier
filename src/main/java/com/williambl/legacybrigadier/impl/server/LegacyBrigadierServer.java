@@ -40,7 +40,7 @@ public class LegacyBrigadierServer implements DedicatedServerModInitializer {
 		Registries.TILE.register(new Id("legacybrigadier", "commandtile"), i -> new Tile(i, Material.STONE) {
 			@Override
 			public boolean method_1608(Level level, int x, int y, int z, Player player) {
-				super.activate(level, x, y, z, player);
+				super.method_1608(level, x, y, z, player);
 				TileEntity entity = level.getTileEntity(x, y+1, z);
 				if (!(entity instanceof SignEntity))
 					return false;
