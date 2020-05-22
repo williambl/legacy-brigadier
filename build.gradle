@@ -55,7 +55,7 @@ dependencies {
 	//to change the versions see the gradle.properties file
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
 
-	mappings files("plasma-b1.7.3+build.8.jar")
+	mappings "com.github.minecraft-cursed-legacy:Plasma:build.10"
 
 	modImplementation "com.github.minecraft-cursed-legacy:cursed-fabric-loader:${project.loader_version}"
 
