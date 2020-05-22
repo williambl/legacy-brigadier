@@ -1,6 +1,6 @@
 {
   "required": true,
-  "package": "com.williambl.legacybrigadier.mixin",
+  "package": "com.williambl.legacybrigadier.impl.mixin",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
   ],

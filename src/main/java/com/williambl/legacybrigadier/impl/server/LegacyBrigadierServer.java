@@ -1,0 +1,368 @@
+package com.williambl.legacybrigadier.impl.server;
+
+import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.builder.RequiredArgumentBuilder;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.williambl.legacybrigadier.api.argument.coordinate.Coordinate;
+import com.williambl.legacybrigadier.api.argument.entityid.EntityId;
+import com.williambl.legacybrigadier.api.argument.itemid.ItemId;
+import com.williambl.legacybrigadier.api.argument.playerselector.PlayerSelector;
+import com.williambl.legacybrigadier.api.argument.tileid.TileId;
+import com.williambl.legacybrigadier.api.command.CommandRegistry;
+import com.williambl.legacybrigadier.api.permission.PermissionManager;
+import com.williambl.legacybrigadier.api.permission.PermissionNode;
+import com.williambl.legacybrigadier.impl.server.mixinhooks.CommandSourceHooks;
+import com.williambl.legacybrigadier.impl.server.network.LegacyBrigadierPluginChannelServer;
+import io.github.minecraftcursedlegacy.api.networking.PluginChannelRegistry;
+import io.github.minecraftcursedlegacy.api.registry.Id;
+import io.github.minecraftcursedlegacy.api.registry.Registries;
+import net.fabricmc.api.DedicatedServerModInitializer;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityRegistry;
+import net.minecraft.entity.SignEntity;
+import net.minecraft.entity.TileEntity;
+import net.minecraft.entity.player.Player;
+import net.minecraft.entity.player.ServerPlayer;
+import net.minecraft.level.Level;
+import net.minecraft.packet.play.SendChatMessageC2S;
+import net.minecraft.server.command.CommandSource;
+import net.minecraft.tile.Tile;
+import net.minecraft.tile.material.Material;
+import net.minecraft.util.Vec3i;
+
+import java.util.Set;
+import java.util.logging.Logger;
+
+import static com.mojang.brigadier.arguments.IntegerArgumentType.getInteger;
+import static com.mojang.brigadier.arguments.IntegerArgumentType.integer;
+import static com.mojang.brigadier.arguments.LongArgumentType.getLong;
+import static com.mojang.brigadier.arguments.LongArgumentType.longArg;
+import static com.mojang.brigadier.arguments.StringArgumentType.*;
+import static com.williambl.legacybrigadier.api.argument.coordinate.CoordinateArgumentType.coordinate;
+import static com.williambl.legacybrigadier.api.argument.coordinate.CoordinateArgumentType.getCoordinate;
+import static com.williambl.legacybrigadier.api.argument.entityid.EntityIdArgumentType.entityId;
+import static com.williambl.legacybrigadier.api.argument.entityid.EntityIdArgumentType.getEntityId;
+import static com.williambl.legacybrigadier.api.argument.itemid.ItemIdArgumentType.getItemId;
+import static com.williambl.legacybrigadier.api.argument.itemid.ItemIdArgumentType.itemId;
+import static com.williambl.legacybrigadier.api.argument.playerselector.PlayerSelectorArgumentType.getPlayer;
+import static com.williambl.legacybrigadier.api.argument.playerselector.PlayerSelectorArgumentType.player;
+import static com.williambl.legacybrigadier.api.argument.tileid.TileIdArgumentType.getTileId;
+import static com.williambl.legacybrigadier.api.argument.tileid.TileIdArgumentType.tileId;
+import static com.williambl.legacybrigadier.api.predicate.HasPermission.permission;
+import static com.williambl.legacybrigadier.api.predicate.IsWorldly.isWorldly;
+
+@Environment(EnvType.SERVER)
+public class LegacyBrigadierServer implements DedicatedServerModInitializer {
+
+	public static final CommandDispatcher<CommandSource> dispatcher = new CommandDispatcher<>();
+
+	public static final LegacyBrigadierPluginChannelServer CHANNEL = new LegacyBrigadierPluginChannelServer();
+
+	public static final Logger LOGGER = Logger.getLogger("Minecraft");
+
+
+	@Override
+	public void onInitializeServer() {
+
+		PluginChannelRegistry.registerPluginChannel(CHANNEL);
+
+		Registries.TILE.register(new Id("legacybrigadier", "commandtile"), i -> new Tile(i, Material.STONE) {
+			@Override
+			public boolean method_1608(Level level, int x, int y, int z, Player player) {
+				super.activate(level, x, y, z, player);
+				TileEntity entity = level.getTileEntity(x, y+1, z);
+				if (!(entity instanceof SignEntity))
+					return false;
+				StringBuilder command = new StringBuilder();
+				for (String line : ((SignEntity) entity).lines) {
+					command.append(line);
+				}
+				try {
+					dispatcher.execute(command.toString(), ((ServerPlayer)player).field_255);
+				} catch (CommandSyntaxException e) {
+					((ServerPlayer)player).field_255.sendFeedback(e.getMessage());
+					return true;
+				}
+				return true;
+			}
+		});
+
+		CommandRegistry.register(
+				LiteralArgumentBuilder.<CommandSource>literal("settile")
+						.requires(permission("command.settile"))
+						.requires(isWorldly())
+						.then(
+								RequiredArgumentBuilder.<CommandSource, Coordinate>argument("pos", coordinate())
+										.then(
+												RequiredArgumentBuilder.<CommandSource, TileId>argument("id", tileId())
+														.executes(context -> {
+															Vec3i pos = getCoordinate(context, "pos").getVec3i((CommandSourceHooks) context.getSource());
+															((CommandSourceHooks) context.getSource()).getWorld().setTile(pos.x, pos.y, pos.z, getTileId(context, "id").getNumericId());
+															return 0;
+														})
+														.then(
+																RequiredArgumentBuilder.<CommandSource, Integer>argument("meta", integer())
+																		.executes(context -> {
+																			Vec3i pos = getCoordinate(context, "pos").getVec3i((CommandSourceHooks) context.getSource());
+																			((CommandSourceHooks) context.getSource()).getWorld().method_201(pos.x, pos.y, pos.z, getTileId(context, "id").getNumericId(), getInteger(context, "meta"));
+																			return 0;
+																		})
+														)
+										)
+						),
+				"Set a tile"
+		);
+
+		CommandRegistry.register(
+				LiteralArgumentBuilder.<CommandSource>literal("summon")
+						.requires(permission("command.summon"))
+						.requires(isWorldly())
+						.then(
+								RequiredArgumentBuilder.<CommandSource, EntityId>argument("id", entityId())
+										.then(
+												RequiredArgumentBuilder.<CommandSource, Coordinate>argument("pos", coordinate())
+														.executes(context -> {
+															Vec3i pos = getCoordinate(context, "pos").getVec3i((CommandSourceHooks) context.getSource());
+															Level world = ((CommandSourceHooks)context.getSource()).getWorld();
+															Entity entity = EntityRegistry.create(getEntityId(context, "id").getId(), world);
+															entity.setPosition(pos.x, pos.y, pos.z);
+															world.spawnEntity(entity);
+															return 0;
+														})
+										)
+						),
+				"Spawn an entity"
+		);
+
+		CommandRegistry.register(
+				LiteralArgumentBuilder.<CommandSource>literal("help")
+						.requires(permission("command.help"))
+						.executes(context -> {
+									LegacyBrigadierServer.dispatcher
+											.getSmartUsage(LegacyBrigadierServer.dispatcher.getRoot(), context.getSource())
+											.forEach((cmd, usage) -> context.getSource().sendFeedback(
+													String.format("   %s                        %s", usage, CommandRegistry.getHelp(cmd))
+											));
+									return 0;
+								}
+						),
+				"Show help"
+		);
+
+		CommandRegistry.register(
+				LiteralArgumentBuilder.<CommandSource>literal("me")
+						.requires(permission("command.me"))
+						.then(
+								RequiredArgumentBuilder.<CommandSource, String>argument("message", greedyString())
+										.executes(context -> {
+											String message = "* " + context.getSource().getName() + " " + getString(context, "message").trim();
+											LOGGER.info(message);
+											((CommandSourceHooks)context.getSource()).getServer().field_2842.method_559(new SendChatMessageC2S(message));
+											return 0;
+										})
+						),
+				"Show a message in chat with the format '* [name] [message]'"
+		);
+
+		CommandRegistry.register(
+				LiteralArgumentBuilder.<CommandSource>literal("msg")
+						.requires(permission("command.msg"))
+						.then(
+								RequiredArgumentBuilder.<CommandSource, PlayerSelector>argument("player", player())
+										.then(
+												RequiredArgumentBuilder.<CommandSource, String>argument("message", greedyString())
+														.executes(context -> {
+															getPlayer(context, "player").getPlayerNames(context.getSource()).forEach(player -> {
+																String message = "§7" + context.getSource().getName() + " whispers " + getString(context, "message");
+																LOGGER.info(message + " to " + player);
+																((CommandSourceHooks)(context.getSource())).getServer().field_2842.method_562(player, new SendChatMessageC2S(message));
+															});
+															return 0;
+														})
+										)
+						),
+				"Whisper something to a player"
+		);
+
+		CommandRegistry.register(
+				LiteralArgumentBuilder.<CommandSource>literal("give")
+						.requires(permission("command.give"))
+						.then(
+								RequiredArgumentBuilder.<CommandSource, PlayerSelector>argument("player", player())
+										.then(
+												RequiredArgumentBuilder.<CommandSource, ItemId>argument("item", itemId())
+														.executes(context -> {
+															getPlayer(context, "player").getPlayers(context.getSource()).forEach(player -> {
+																int item = getItemId(context, "item").getNumericId();
+																context.getSource().sendFeedback("Giving " + player.name + " some " + item);
+																LOGGER.info("Giving " + player.name + " some " + item);
+																player.dropItem(item, 1, 0);
+															});
+															return 0;
+														})
+														.then(
+																RequiredArgumentBuilder.<CommandSource, Integer>argument("count", integer(0, 64))
+																		.executes(context -> {
+																			getPlayer(context, "player").getPlayers(context.getSource()).forEach(player -> {
+																				int item = getItemId(context, "item").getNumericId();
+																				int count = getInteger(context, "count");
+																				context.getSource().sendFeedback("Giving " + player.name + " " + count + " of " + item);
+																				LOGGER.info("Giving " + player.name + " " + count + " of " + item);
+																				player.dropItem(item, count, 0);
+																			});
+																			return 0;
+																		})
+																		.then(
+																				RequiredArgumentBuilder.<CommandSource, Integer>argument("meta", integer(0, 15))
+																						.executes(context -> {
+																							getPlayer(context, "player").getPlayers(context.getSource()).forEach(player -> {
+																								int item = getItemId(context, "item").getNumericId();
+																								int count = getInteger(context, "count");
+																								int meta = getInteger(context, "meta");
+																								context.getSource().sendFeedback("Giving " + player.name + " " + count + " of " + item + ":" + meta);
+																								LOGGER.info("Giving " + player.name + " " + count + " of " + item + ":" + meta);
+																								player.dropItem(item, count, meta);
+																							});
+																							return 0;
+																						})
+																		)
+														)
+										)
+						),
+				"Whisper something to a player"
+		);
+
+		CommandRegistry.register(
+				LiteralArgumentBuilder.<CommandSource>literal("time")
+						.requires(permission("command.time"))
+						.requires(isWorldly())
+						.then(
+								LiteralArgumentBuilder.<CommandSource>literal("set")
+										.then(RequiredArgumentBuilder.<CommandSource, Long>argument("time", longArg(0))
+												.executes(context -> {
+													((CommandSourceHooks)context.getSource()).getWorld().setLevelTime(getLong(context, "time"));
+													return 0;
+												}))
+										.then(LiteralArgumentBuilder.<CommandSource>literal("day")
+												.executes(context -> {
+													((CommandSourceHooks)context.getSource()).getWorld().setLevelTime(0);
+													return 0;
+												}))
+										.then(LiteralArgumentBuilder.<CommandSource>literal("noon")
+												.executes(context -> {
+													((CommandSourceHooks)context.getSource()).getWorld().setLevelTime(6000);
+													return 0;
+												}))
+										.then(LiteralArgumentBuilder.<CommandSource>literal("night")
+												.executes(context -> {
+													((CommandSourceHooks)context.getSource()).getWorld().setLevelTime(12000);
+													return 0;
+												}))
+										.then(LiteralArgumentBuilder.<CommandSource>literal("midnight")
+												.executes(context -> {
+													((CommandSourceHooks)context.getSource()).getWorld().setLevelTime(18000);
+													return 0;
+												}))
+						)
+						.then(
+								LiteralArgumentBuilder.<CommandSource>literal("get")
+										.executes(context -> {
+											context.getSource().sendFeedback(Long.toString(((CommandSourceHooks)context.getSource()).getWorld().getLevelTime()));
+											return 0;
+										})
+						)
+						.then(
+								LiteralArgumentBuilder.<CommandSource>literal("add")
+										.then(RequiredArgumentBuilder.<CommandSource, Long>argument("time", longArg())
+												.executes(context -> {
+													Level level = ((CommandSourceHooks)context.getSource()).getWorld();
+													level.setLevelTime(level.getLevelTime()+getLong(context, "time"));
+													return 0;
+												}))
+						),
+				"Set or get the time"
+		);
+
+		CommandRegistry.register(
+				LiteralArgumentBuilder.<CommandSource>literal("permissions")
+						.requires(permission("command.permissions"))
+				.then(
+						LiteralArgumentBuilder.<CommandSource>literal("get")
+						.then(
+								RequiredArgumentBuilder.<CommandSource, PlayerSelector>argument("player", player())
+								.executes(context -> {
+									final StringBuilder builder = new StringBuilder();
+									for (String playerName : getPlayer(context, "player").getPlayerNames(context.getSource())) {
+										final Set<PermissionNode> nodes = PermissionManager.getNodesForName(playerName);
+										builder.append(playerName);
+										builder.append(" has permissions:");
+										for (PermissionNode node : nodes) {
+											builder.append(" ");
+											builder.append(node.toString());
+										}
+										builder.append("\n");
+									}
+									builder.deleteCharAt(builder.length()-1); // Remove last newline
+									context.getSource().sendFeedback(builder.toString());
+									return 0;
+								})
+						)
+				)
+				.then(
+						LiteralArgumentBuilder.<CommandSource>literal("add")
+						.then(
+								RequiredArgumentBuilder.<CommandSource, PlayerSelector>argument("player", player())
+								.then(
+										RequiredArgumentBuilder.<CommandSource, String>argument("node", string())
+										.executes(context -> {
+											final StringBuilder builder = new StringBuilder();
+											final PermissionNode node = new PermissionNode(getString(context, "node"));
+											for (String playerName : getPlayer(context, "player").getPlayerNames(context.getSource())) {
+												final boolean success = PermissionManager.addNodeToName(playerName, node);
+												builder.append(success ? "Added" : "Failed to add");
+												builder.append(" node ");
+												builder.append(node.toString());
+												builder.append(" to ");
+												builder.append(playerName);
+												builder.append("\n");
+											}
+											builder.deleteCharAt(builder.length()-1); // Remove last newline
+											context.getSource().sendFeedback(builder.toString());
+											return 0;
+										})
+								)
+						)
+				)
+						.then(
+								LiteralArgumentBuilder.<CommandSource>literal("remove")
+										.then(
+												RequiredArgumentBuilder.<CommandSource, PlayerSelector>argument("player", player())
+														.then(
+																RequiredArgumentBuilder.<CommandSource, String>argument("node", string())
+																		.executes(context -> {
+																			final StringBuilder builder = new StringBuilder();
+																			final PermissionNode node = new PermissionNode(getString(context, "node"));
+																			for (String playerName : getPlayer(context, "player").getPlayerNames(context.getSource())) {
+																				final boolean success = PermissionManager.removeNodeFromName(playerName, node);
+																				builder.append(success ? "Removed" : "Failed to remove");
+																				builder.append(" node ");
+																				builder.append(node.toString());
+																				builder.append(" from ");
+																				builder.append(playerName);
+																				builder.append("\n");
+																			}
+																			builder.deleteCharAt(builder.length()-1); // Remove last newline
+																			context.getSource().sendFeedback(builder.toString());
+																			return 0;
+																		})
+														)
+										)
+				),
+				"Query or add permissions to players."
+		);
+
+	}
+}
