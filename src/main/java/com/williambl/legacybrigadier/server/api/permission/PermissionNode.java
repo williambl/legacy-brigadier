@@ -23,11 +23,12 @@ public class PermissionNode {
     public boolean satisfies(PermissionNode nodeToCheck) {
         String[] pathElements = this.toString().split("\\.");
         String[] checkPathElements = nodeToCheck.toString().split("\\.");
+        final int length = Math.max(pathElements.length, checkPathElements.length);
 
-        for (int i = 0; i < checkPathElements.length; i++) {
-            String node1 = i < pathElements.length ? pathElements[i] : "*";
-            String node2 = checkPathElements[i];
-            if (!nodeSatisfiesNode(node1, node2))
+        for (int i = 0; i < length; i++) {
+            final String node1 = i < pathElements.length ? pathElements[i] : "*";
+            final String node2 = i < checkPathElements.length ? checkPathElements[i] : null;
+            if (node2 == null || !nodeSatisfiesNode(node1, node2))
                 return false;
         }
         return true;
