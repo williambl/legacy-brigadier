@@ -3,6 +3,7 @@ package com.williambl.legacybrigadier.impl.server.command;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.williambl.legacybrigadier.api.argument.playerselector.PlayerSelector;
+import com.williambl.legacybrigadier.api.command.CommandProvider;
 import com.williambl.legacybrigadier.api.permission.PermissionManager;
 import com.williambl.legacybrigadier.api.permission.PermissionNode;
 import net.fabricmc.api.EnvType;
@@ -10,7 +11,6 @@ import net.fabricmc.api.Environment;
 import net.minecraft.server.command.CommandSource;
 
 import java.util.Set;
-import java.util.function.Supplier;
 
 import static com.mojang.brigadier.arguments.StringArgumentType.getString;
 import static com.mojang.brigadier.arguments.StringArgumentType.string;
@@ -19,7 +19,7 @@ import static com.williambl.legacybrigadier.api.argument.playerselector.PlayerSe
 import static com.williambl.legacybrigadier.api.predicate.HasPermission.permission;
 
 @Environment(EnvType.SERVER)
-public class PermissionsCommand implements Supplier<LiteralArgumentBuilder<CommandSource>> {
+public class PermissionsCommand implements CommandProvider {
 
     @Override
     public LiteralArgumentBuilder<CommandSource> get() {

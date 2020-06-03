@@ -4,6 +4,7 @@ import com.mojang.brigadier.Command;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
+import com.williambl.legacybrigadier.api.command.CommandProvider;
 import com.williambl.legacybrigadier.impl.server.mixinhooks.CommandSourceHooks;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -11,7 +12,6 @@ import net.minecraft.level.Level;
 import net.minecraft.server.command.CommandSource;
 
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 import static com.mojang.brigadier.arguments.LongArgumentType.getLong;
 import static com.mojang.brigadier.arguments.LongArgumentType.longArg;
@@ -19,7 +19,7 @@ import static com.williambl.legacybrigadier.api.predicate.HasPermission.permissi
 import static com.williambl.legacybrigadier.api.predicate.IsWorldly.isWorldly;
 
 @Environment(EnvType.SERVER)
-public class TimeCommand implements Supplier<LiteralArgumentBuilder<CommandSource>> {
+public class TimeCommand implements CommandProvider {
 
     @Override
     public LiteralArgumentBuilder<CommandSource> get() {

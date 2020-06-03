@@ -5,6 +5,7 @@ import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.williambl.legacybrigadier.api.argument.coordinate.Coordinate;
 import com.williambl.legacybrigadier.api.argument.entityid.EntityId;
+import com.williambl.legacybrigadier.api.command.CommandProvider;
 import com.williambl.legacybrigadier.impl.server.mixinhooks.CommandSourceHooks;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -14,8 +15,6 @@ import net.minecraft.level.Level;
 import net.minecraft.server.command.CommandSource;
 import net.minecraft.util.Vec3i;
 
-import java.util.function.Supplier;
-
 import static com.williambl.legacybrigadier.api.argument.coordinate.CoordinateArgumentType.coordinate;
 import static com.williambl.legacybrigadier.api.argument.coordinate.CoordinateArgumentType.getCoordinate;
 import static com.williambl.legacybrigadier.api.argument.entityid.EntityIdArgumentType.entityId;
@@ -24,7 +23,7 @@ import static com.williambl.legacybrigadier.api.predicate.HasPermission.permissi
 import static com.williambl.legacybrigadier.api.predicate.IsWorldly.isWorldly;
 
 @Environment(EnvType.SERVER)
-public class SummonCommand implements Supplier<LiteralArgumentBuilder<CommandSource>> {
+public class SummonCommand implements CommandProvider {
     @Override
     public LiteralArgumentBuilder<CommandSource> get() {
         return LiteralArgumentBuilder.<CommandSource>literal("summon")

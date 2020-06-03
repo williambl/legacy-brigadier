@@ -4,14 +4,13 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.williambl.legacybrigadier.api.argument.playerselector.PlayerSelector;
+import com.williambl.legacybrigadier.api.command.CommandProvider;
 import com.williambl.legacybrigadier.impl.server.LegacyBrigadierServer;
 import com.williambl.legacybrigadier.impl.server.mixinhooks.CommandSourceHooks;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.packet.play.SendChatMessageC2S;
 import net.minecraft.server.command.CommandSource;
-
-import java.util.function.Supplier;
 
 import static com.mojang.brigadier.arguments.StringArgumentType.getString;
 import static com.mojang.brigadier.arguments.StringArgumentType.greedyString;
@@ -20,7 +19,7 @@ import static com.williambl.legacybrigadier.api.argument.playerselector.PlayerSe
 import static com.williambl.legacybrigadier.api.predicate.HasPermission.permission;
 
 @Environment(EnvType.SERVER)
-public class MsgCommand implements Supplier<LiteralArgumentBuilder<CommandSource>> {
+public class MsgCommand implements CommandProvider {
 
     @Override
     public LiteralArgumentBuilder<CommandSource> get() {

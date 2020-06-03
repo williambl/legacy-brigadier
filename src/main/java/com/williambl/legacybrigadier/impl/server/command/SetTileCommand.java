@@ -5,13 +5,12 @@ import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.williambl.legacybrigadier.api.argument.coordinate.Coordinate;
 import com.williambl.legacybrigadier.api.argument.tileid.TileId;
+import com.williambl.legacybrigadier.api.command.CommandProvider;
 import com.williambl.legacybrigadier.impl.server.mixinhooks.CommandSourceHooks;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.server.command.CommandSource;
 import net.minecraft.util.Vec3i;
-
-import java.util.function.Supplier;
 
 import static com.mojang.brigadier.arguments.IntegerArgumentType.getInteger;
 import static com.mojang.brigadier.arguments.IntegerArgumentType.integer;
@@ -23,7 +22,7 @@ import static com.williambl.legacybrigadier.api.predicate.HasPermission.permissi
 import static com.williambl.legacybrigadier.api.predicate.IsWorldly.isWorldly;
 
 @Environment(EnvType.SERVER)
-public class SetTileCommand implements Supplier<LiteralArgumentBuilder<CommandSource>> {
+public class SetTileCommand implements CommandProvider {
     @Override
     public LiteralArgumentBuilder<CommandSource> get() {
         return LiteralArgumentBuilder.<CommandSource>literal("settile")

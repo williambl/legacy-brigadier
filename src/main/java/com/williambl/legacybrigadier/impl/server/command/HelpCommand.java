@@ -2,18 +2,17 @@ package com.williambl.legacybrigadier.impl.server.command;
 
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
+import com.williambl.legacybrigadier.api.command.CommandProvider;
 import com.williambl.legacybrigadier.api.command.CommandRegistry;
 import com.williambl.legacybrigadier.impl.server.LegacyBrigadierServer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.server.command.CommandSource;
 
-import java.util.function.Supplier;
-
 import static com.williambl.legacybrigadier.api.predicate.HasPermission.permission;
 
 @Environment(EnvType.SERVER)
-public class HelpCommand implements Supplier<LiteralArgumentBuilder<CommandSource>> {
+public class HelpCommand implements CommandProvider {
 
     @Override
     public LiteralArgumentBuilder<CommandSource> get() {
