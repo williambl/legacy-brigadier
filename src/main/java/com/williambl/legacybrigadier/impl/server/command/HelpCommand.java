@@ -35,7 +35,7 @@ public class HelpCommand implements Supplier<LiteralArgumentBuilder<CommandSourc
         StringBuilder builder = new StringBuilder("   ");
         builder.append(usage);
         int charsUntilHelp = 29; //same as vanilla
-        final int spaces = Math.max(0, charsUntilHelp - builder.length());
+        final int spaces = Math.max(1, charsUntilHelp - builder.length());
         for (int i = 0; i < spaces; i++) {
             builder.append(' ');
         }
