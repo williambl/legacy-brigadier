@@ -61,7 +61,7 @@ public class PermissionsCommand implements CommandProvider {
                                                 builder.append("\n");
                                             }
                                             builder.deleteCharAt(builder.length()-1); // Remove last newline
-                                            context.getSource().sendFeedback(builder.toString());
+                                            sendFeedbackAndLog(context.getSource(), builder.toString());
                                             return 0;
                                         })
                                 )
@@ -83,7 +83,7 @@ public class PermissionsCommand implements CommandProvider {
                                                 builder.append("\n");
                                             }
                                             builder.deleteCharAt(builder.length()-1); // Remove last newline
-                                            context.getSource().sendFeedback(builder.toString());
+                                            sendFeedbackAndLog(context.getSource(), builder.toString());
                                             return 0;
                                         })
                                 )

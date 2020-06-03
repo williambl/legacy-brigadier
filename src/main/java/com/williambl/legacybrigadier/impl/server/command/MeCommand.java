@@ -4,11 +4,8 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.williambl.legacybrigadier.api.command.CommandProvider;
-import com.williambl.legacybrigadier.impl.server.LegacyBrigadierServer;
-import com.williambl.legacybrigadier.impl.server.mixinhooks.CommandSourceHooks;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.packet.play.SendChatMessageC2S;
 import net.minecraft.server.command.CommandSource;
 
 import static com.mojang.brigadier.arguments.StringArgumentType.getString;
@@ -29,8 +26,7 @@ public class MeCommand implements CommandProvider {
 
     public int sendMeMessage(CommandContext<CommandSource> context) {
         String message = "* " + context.getSource().getName() + " " + getString(context, "message").trim();
-        LegacyBrigadierServer.LOGGER.info(message);
-        ((CommandSourceHooks)context.getSource()).getServer().field_2842.method_559(new SendChatMessageC2S(message));
+        sendToChatAndLog(context.getSource(), message);
         return 0;
     }
 }

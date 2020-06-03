@@ -35,7 +35,7 @@ public class MsgCommand implements CommandProvider {
     public int whisper(CommandContext<CommandSource> context) {
         getPlayer(context, "player").getPlayerNames(context.getSource()).forEach(player -> {
             String message = "§7" + context.getSource().getName() + " whispers " + getString(context, "message");
-            LegacyBrigadierServer.LOGGER.info(message + " to " + player);
+            LegacyBrigadierServer.LOGGER.info(context.getSource().getName() + " whispers " + message + " to " + player);
             ((CommandSourceHooks)(context.getSource())).getServer().field_2842.method_562(player, new SendChatMessageC2S(message));
         });
         return 0;

@@ -43,7 +43,7 @@ public class TimeCommand implements CommandProvider {
                 .then(
                         LiteralArgumentBuilder.<CommandSource>literal("get")
                                 .executes(context -> {
-                                    context.getSource().sendFeedback(Long.toString(((CommandSourceHooks)context.getSource()).getWorld().getLevelTime()));
+                                    sendFeedbackAndLog(context.getSource(), Long.toString(((CommandSourceHooks)context.getSource()).getWorld().getLevelTime()));
                                     return 0;
                                 })
                 )
@@ -53,6 +53,7 @@ public class TimeCommand implements CommandProvider {
                                         .executes(context -> {
                                             Level level = ((CommandSourceHooks)context.getSource()).getWorld();
                                             level.setLevelTime(level.getLevelTime()+getLong(context, "time"));
+                                            sendFeedbackAndLog(context.getSource(), "Set time to " + level.getLevelTime());
                                             return 0;
                                         }))
                 );
@@ -60,7 +61,9 @@ public class TimeCommand implements CommandProvider {
 
     public Command<CommandSource> setTime(Function<CommandContext<CommandSource>, Long> time) {
         return context -> {
-            ((CommandSourceHooks) context.getSource()).getWorld().setLevelTime(time.apply(context));
+            long timeValue = time.apply(context);
+            ((CommandSourceHooks) context.getSource()).getWorld().setLevelTime(timeValue);
+            sendFeedbackAndLog(context.getSource(), "Set time to " + timeValue);
             return 0;
         };
     }

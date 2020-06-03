@@ -32,7 +32,7 @@ public class SetTileCommand implements CommandProvider {
                         .then(RequiredArgumentBuilder.<CommandSource, TileId>argument("id", tileId())
                                 .executes(this::placeBlock)
                                 .then(RequiredArgumentBuilder.<CommandSource, Integer>argument("meta", integer())
-                                        .executes(this::placeBlockWithContext)
+                                        .executes(this::placeBlockWithMeta)
                                 )
                         )
                 );
@@ -40,13 +40,18 @@ public class SetTileCommand implements CommandProvider {
 
     public int placeBlock(CommandContext<CommandSource> context) {
         Vec3i pos = getCoordinate(context, "pos").getVec3i((CommandSourceHooks) context.getSource());
-        ((CommandSourceHooks) context.getSource()).getWorld().setTile(pos.x, pos.y, pos.z, getTileId(context, "id").getNumericId());
+        TileId tile = getTileId(context, "id");
+        ((CommandSourceHooks) context.getSource()).getWorld().setTile(pos.x, pos.y, pos.z, tile.getNumericId());
+        sendFeedbackAndLog(context.getSource(), "Set block at" + pos.x + " " + pos.y + " " + pos.z + " to " + tile.getNumericId());
         return 0;
     }
 
-    public int placeBlockWithContext(CommandContext<CommandSource> context) {
+    public int placeBlockWithMeta(CommandContext<CommandSource> context) {
         Vec3i pos = getCoordinate(context, "pos").getVec3i((CommandSourceHooks) context.getSource());
-        ((CommandSourceHooks) context.getSource()).getWorld().method_201(pos.x, pos.y, pos.z, getTileId(context, "id").getNumericId(), getInteger(context, "meta"));
+        TileId tile = getTileId(context, "id");
+        int meta = getInteger(context, "meta");
+        ((CommandSourceHooks) context.getSource()).getWorld().method_201(pos.x, pos.y, pos.z, tile.getNumericId(), meta);
+        sendFeedbackAndLog(context.getSource(), "Set block at" + pos.x + " " + pos.y + " " + pos.z + " to " + tile.getNumericId() + ":" + meta);
         return 0;
     }
 }

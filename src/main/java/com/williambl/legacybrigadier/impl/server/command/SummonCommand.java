@@ -39,9 +39,11 @@ public class SummonCommand implements CommandProvider {
     public int summonEntity(CommandContext<CommandSource> context) {
         Vec3i pos = getCoordinate(context, "pos").getVec3i((CommandSourceHooks) context.getSource());
         Level world = ((CommandSourceHooks)context.getSource()).getWorld();
-        Entity entity = EntityRegistry.create(getEntityId(context, "id").getId(), world);
+        EntityId id = getEntityId(context, "id");
+        Entity entity = EntityRegistry.create(id.getId(), world);
         entity.setPosition(pos.x, pos.y, pos.z);
         world.spawnEntity(entity);
+        sendFeedbackAndLog(context.getSource(), "Summoned " + id.getId() + " at " + pos.x + " " + pos.y + " " + pos.z);
         return 0;
     }
 }
