@@ -12,8 +12,8 @@ import net.minecraft.server.command.CommandSource;
 
 import java.util.Set;
 
-import static com.mojang.brigadier.arguments.StringArgumentType.getString;
-import static com.mojang.brigadier.arguments.StringArgumentType.string;
+import static com.williambl.legacybrigadier.api.argument.permissionnode.PermissionNodeArgumentType.getPermissionNode;
+import static com.williambl.legacybrigadier.api.argument.permissionnode.PermissionNodeArgumentType.permissionNode;
 import static com.williambl.legacybrigadier.api.argument.playerselector.PlayerSelectorArgumentType.getPlayer;
 import static com.williambl.legacybrigadier.api.argument.playerselector.PlayerSelectorArgumentType.player;
 import static com.williambl.legacybrigadier.api.predicate.HasPermission.permission;
@@ -47,10 +47,10 @@ public class PermissionsCommand implements CommandProvider {
                 )
                 .then(LiteralArgumentBuilder.<CommandSource>literal("add")
                         .then(RequiredArgumentBuilder.<CommandSource, PlayerSelector>argument("player", player())
-                                .then(RequiredArgumentBuilder.<CommandSource, String>argument("node", string())
+                                .then(RequiredArgumentBuilder.<CommandSource, PermissionNode>argument("node", permissionNode())
                                         .executes(context -> {
                                             final StringBuilder builder = new StringBuilder();
-                                            final PermissionNode node = new PermissionNode(getString(context, "node"));
+                                            final PermissionNode node = getPermissionNode(context, "node");
                                             for (String playerName : getPlayer(context, "player").getPlayerNames(context.getSource())) {
                                                 final boolean success = PermissionManager.addNodeToName(playerName, node);
                                                 builder.append(success ? "Added" : "Failed to add");
@@ -69,10 +69,10 @@ public class PermissionsCommand implements CommandProvider {
                 )
                 .then(LiteralArgumentBuilder.<CommandSource>literal("remove")
                         .then(RequiredArgumentBuilder.<CommandSource, PlayerSelector>argument("player", player())
-                                .then(RequiredArgumentBuilder.<CommandSource, String>argument("node", string())
+                                .then(RequiredArgumentBuilder.<CommandSource, PermissionNode>argument("node", permissionNode())
                                         .executes(context -> {
                                             final StringBuilder builder = new StringBuilder();
-                                            final PermissionNode node = new PermissionNode(getString(context, "node"));
+                                            final PermissionNode node = getPermissionNode(context, "node");
                                             for (String playerName : getPlayer(context, "player").getPlayerNames(context.getSource())) {
                                                 final boolean success = PermissionManager.removeNodeFromName(playerName, node);
                                                 builder.append(success ? "Removed" : "Failed to remove");

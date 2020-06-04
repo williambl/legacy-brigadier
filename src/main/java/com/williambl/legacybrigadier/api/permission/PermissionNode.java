@@ -16,7 +16,6 @@ public class PermissionNode {
         this.path = path;
     }
 
-
     /**
      * Check if this node satisfies another.
      * @param nodeToCheck the node to check.

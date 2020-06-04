@@ -17,6 +17,10 @@ public final class StringReaderUtils {
         return StringReader.isAllowedInUnquotedString(c) || c == ':';
     }
 
+    private static boolean isAllowedInPermissionNode(final char c) {
+        return StringReader.isAllowedInUnquotedString(c) || c == '*';
+    }
+
     public static String readTargetSelector(StringReader reader) {
         final int start = reader.getCursor();
         while (reader.canRead() && isAllowedInTargetSelector(reader.peek())) {
@@ -28,6 +32,14 @@ public final class StringReaderUtils {
     public static String readId(StringReader reader) {
         final int start = reader.getCursor();
         while (reader.canRead() && isAllowedInId(reader.peek())) {
+            reader.skip();
+        }
+        return reader.getString().substring(start, reader.getCursor());
+    }
+
+    public static String readPermissionNode(StringReader reader) {
+        final int start = reader.getCursor();
+        while (reader.canRead() && isAllowedInPermissionNode(reader.peek())) {
             reader.skip();
         }
         return reader.getString().substring(start, reader.getCursor());
