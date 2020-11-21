@@ -19,10 +19,10 @@
   "environment": "*",
   "entrypoints": {
     "server": [
-      "com.williambl.legacybrigadier.server.LegacyBrigadierServer"
+      "com.williambl.legacybrigadier.impl.server.LegacyBrigadierServer"
     ],
     "client": [
-      "com.williambl.legacybrigadier.client.LegacyBrigadierClient"
+      "com.williambl.legacybrigadier.impl.client.LegacyBrigadierClient"
     ]
   },
   "mixins": [
