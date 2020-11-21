@@ -29,7 +29,7 @@ public class LegacyBrigadierPluginChannelServer extends PluginChannel {
     }
 
     @Override
-    public void onRecieve(PacketHandler packetHandler, byte[] bytes) {
+    public void onReceive(PacketHandler packetHandler, byte[] bytes) {
         if (packetHandler instanceof ServerPlayerPacketHandler) {
             String incompleteCommand = new String(bytes, StandardCharsets.UTF_8);
             ParseResults<CommandSource> parseResults = LegacyBrigadierServer.dispatcher.parse(incompleteCommand, (ServerPlayerPacketHandler) packetHandler);

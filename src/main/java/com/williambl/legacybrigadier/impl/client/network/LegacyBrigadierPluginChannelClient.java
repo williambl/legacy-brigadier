@@ -26,7 +26,7 @@ public class LegacyBrigadierPluginChannelClient extends PluginChannel {
     }
 
     @Override
-    public void onRecieve(PacketHandler packetHandler, byte[] bytes) {
+    public void onReceive(PacketHandler packetHandler, byte[] bytes) {
         if (packetHandler instanceof ClientPlayNetworkHandler) {
             List<String> completions = bytesToStrings(bytes);
             Screen screen = LegacyBrigadierClient.MINECRAFT.currentScreen;
