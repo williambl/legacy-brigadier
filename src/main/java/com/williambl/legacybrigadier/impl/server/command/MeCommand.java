@@ -7,7 +7,7 @@ import com.williambl.legacybrigadier.impl.server.LegacyBrigadierServer;
 import com.williambl.legacybrigadier.impl.server.mixinhooks.CommandSourceHooks;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.packet.play.SendChatMessageC2S;
+import net.minecraft.packet.play.SendChatMessageS2C;
 import net.minecraft.server.command.CommandSource;
 
 import java.util.function.Supplier;
@@ -31,7 +31,7 @@ public class MeCommand implements Supplier<LiteralArgumentBuilder<CommandSource>
     public int sendMeMessage(CommandContext<CommandSource> context) {
         String message = "* " + context.getSource().getName() + " " + getString(context, "message").trim();
         LegacyBrigadierServer.LOGGER.info(message);
-        ((CommandSourceHooks)context.getSource()).getServer().field_2842.method_559(new SendChatMessageC2S(message));
+        ((CommandSourceHooks)context.getSource()).getServer().field_2842.method_559(new SendChatMessageS2C(message));
         return 0;
     }
 }

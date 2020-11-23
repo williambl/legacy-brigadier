@@ -39,8 +39,8 @@ public class LegacyBrigadierServer implements DedicatedServerModInitializer {
 
 		Registries.TILE.register(new Id("legacybrigadier", "commandtile"), i -> new Tile(i, Material.STONE) {
 			@Override
-			public boolean method_1608(Level level, int x, int y, int z, Player player) {
-				super.method_1608(level, x, y, z, player);
+			public boolean activate(Level level, int x, int y, int z, Player player) {
+				super.activate(level, x, y, z, player);
 				TileEntity entity = level.getTileEntity(x, y+1, z);
 				if (!(entity instanceof SignEntity))
 					return false;
@@ -49,9 +49,9 @@ public class LegacyBrigadierServer implements DedicatedServerModInitializer {
 					command.append(line);
 				}
 				try {
-					dispatcher.execute(command.toString(), ((ServerPlayer)player).field_255);
+					dispatcher.execute(command.toString(), ((ServerPlayer)player).packetHandler);
 				} catch (CommandSyntaxException e) {
-					((ServerPlayer)player).field_255.sendFeedback(e.getMessage());
+					((ServerPlayer)player).packetHandler.sendFeedback(e.getMessage());
 					return true;
 				}
 				return true;

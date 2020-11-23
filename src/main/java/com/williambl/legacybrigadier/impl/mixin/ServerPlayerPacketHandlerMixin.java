@@ -15,7 +15,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 @Mixin(ServerPlayerPacketHandler.class)
 @Environment(EnvType.SERVER)
 public abstract class ServerPlayerPacketHandlerMixin implements ServerPlayerPacketHandlerHooks {
-    @Accessor(value = "field_920")
+    @Accessor(value = "player")
     public abstract ServerPlayer getPlayer();
 
     @Accessor(value = "field_919")
