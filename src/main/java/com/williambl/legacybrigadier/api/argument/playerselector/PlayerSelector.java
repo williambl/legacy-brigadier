@@ -59,7 +59,7 @@ public class PlayerSelector {
                     List<Player> players = UncheckedCaster.list(level.players);
                     players.forEach(it -> result.add(it.name));
                 } else {
-                    List<Player> players = UncheckedCaster.list(((CommandSourceHooks)commandSource).getServer().field_2842.field_578);
+                    List<Player> players = UncheckedCaster.list(((CommandSourceHooks)commandSource).getServer().field_2842.players);
                     players.forEach(it -> result.add(it.name));
                 }
                 break;
@@ -83,7 +83,7 @@ public class PlayerSelector {
         if (level != null) {
             players = UncheckedCaster.list(level.players);
         } else {
-            players = UncheckedCaster.list(((CommandSourceHooks)commandSource).getServer().field_2842.field_578);
+            players = UncheckedCaster.list(((CommandSourceHooks)commandSource).getServer().field_2842.players);
         }
         switch (type) {
             case RAW:

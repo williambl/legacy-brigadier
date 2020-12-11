@@ -4,7 +4,7 @@
   "version": "${version}",
 
   "name": "Legacy Brigadier",
-  "description": "aa",
+  "description": "Rewrites the chat and command system for the game, adding tab-completion, history, permissions, and more",
   "authors": [
     "Will BL"
   ],

@@ -4,14 +4,14 @@ import com.williambl.legacybrigadier.api.permission.PermissionManager;
 import com.williambl.legacybrigadier.api.permission.PermissionNode;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.class_166;
+import net.minecraft.server.ServerPlayerConnectionManager;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
 import java.util.Set;
 
-@Mixin(class_166.class)
+@Mixin(ServerPlayerConnectionManager.class)
 @Environment(EnvType.SERVER)
 public class ServerConfigMixin {
 

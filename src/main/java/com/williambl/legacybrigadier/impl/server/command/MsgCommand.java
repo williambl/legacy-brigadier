@@ -9,7 +9,7 @@ import com.williambl.legacybrigadier.impl.server.LegacyBrigadierServer;
 import com.williambl.legacybrigadier.impl.server.mixinhooks.CommandSourceHooks;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.packet.play.SendChatMessageC2S;
+import net.minecraft.packet.play.SendChatMessageS2C;
 import net.minecraft.server.command.CommandSource;
 
 import static com.mojang.brigadier.arguments.StringArgumentType.getString;
@@ -36,7 +36,7 @@ public class MsgCommand implements CommandProvider {
         getPlayer(context, "player").getPlayerNames(context.getSource()).forEach(player -> {
             String message = "§7" + context.getSource().getName() + " whispers " + getString(context, "message");
             LegacyBrigadierServer.LOGGER.info(context.getSource().getName() + " whispers " + message + " to " + player);
-            ((CommandSourceHooks)(context.getSource())).getServer().field_2842.method_562(player, new SendChatMessageC2S(message));
+            ((CommandSourceHooks)(context.getSource())).getServer().field_2842.method_562(player, new SendChatMessageS2C(message));
         });
         return 0;
     }
