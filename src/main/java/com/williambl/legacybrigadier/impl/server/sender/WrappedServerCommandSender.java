@@ -16,6 +16,7 @@ import net.minecraft.server.command.CommandSource;
 import net.minecraft.server.gui.ServerGUI;
 import net.minecraft.server.network.ServerPlayPacketHandler;
 import net.minecraft.util.Vec3i;
+import net.minecraft.util.maths.Vec3d;
 import org.lwjgl.util.vector.Vector2f;
 
 import javax.annotation.Nullable;
@@ -44,13 +45,13 @@ public class WrappedServerCommandSender implements ExtendedSender {
     }
 
     @Override
-    public Vec3i getPosition() {
+    public Vec3d getPosition() {
         Player player = this.wrapped.getPlayer();
         if (player != null) {
-            return new Vec3i((int)player.x, (int)player.y, (int)player.z);
+            return Vec3d.getOrCreate(player.x, player.y, player.z);
         }
 
-        return new Vec3i(0, 0, 0);
+        return Vec3d.getOrCreate(0, 0, 0);
     }
 
     @Override

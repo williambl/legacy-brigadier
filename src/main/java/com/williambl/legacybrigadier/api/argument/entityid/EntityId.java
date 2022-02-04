@@ -3,6 +3,7 @@ package com.williambl.legacybrigadier.api.argument.entityid;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 
+//TODO: replace with EntityType
 @Environment(EnvType.SERVER)
 public class EntityId {
     private final String id;

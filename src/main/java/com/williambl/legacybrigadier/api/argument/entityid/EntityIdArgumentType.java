@@ -8,6 +8,8 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
+import com.williambl.legacybrigadier.impl.server.utils.StringReaderUtils;
+import io.github.minecraftcursedlegacy.api.registry.Id;
 import io.github.minecraftcursedlegacy.api.registry.Registries;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -25,13 +27,13 @@ public class EntityIdArgumentType implements ArgumentType<EntityId> {
 
     private static final SimpleCommandExceptionType NOT_VALID_ID = new SimpleCommandExceptionType(new LiteralMessage("Invalid Entity ID"));
 
-    private static List<String> validValues;
+    private static List<Id> validValues;
 
-    private static List<String> getValidValues() {
+    private static List<Id> getValidValues() {
         if (validValues != null)
             return validValues;
         validValues = new ArrayList<>();
-        Registries.ENTITY_TYPE.ids().forEach(id -> validValues.add(id.toString()));
+        validValues.addAll(Registries.ENTITY_TYPE.ids());
         return validValues;
     }
 
@@ -46,8 +48,8 @@ public class EntityIdArgumentType implements ArgumentType<EntityId> {
     @Override
     public EntityId parse(StringReader reader) throws CommandSyntaxException {
         int cursor = reader.getCursor();
-        String id = reader.readUnquotedString();
-        if (!validValues.contains(id)) {
+        String id = StringReaderUtils.readId(reader);
+        if (!getValidValues().contains(new Id(id))) {
             reader.setCursor(cursor);
             throw NOT_VALID_ID.createWithContext(reader);
         }
@@ -56,9 +58,9 @@ public class EntityIdArgumentType implements ArgumentType<EntityId> {
 
     @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-        for (String validValue : getValidValues()) {
-            if (validValue.startsWith(builder.getRemaining()))
-                builder.suggest(validValue);
+        for (Id validValue : getValidValues()) {
+            if (validValue.toString().startsWith(builder.getRemaining()))
+                builder.suggest(validValue.toString());
         }
         return builder.buildFuture();
     }

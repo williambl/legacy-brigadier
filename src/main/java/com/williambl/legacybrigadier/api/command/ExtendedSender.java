@@ -8,6 +8,7 @@ import net.minecraft.entity.player.Player;
 import net.minecraft.level.Level;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.Vec3i;
+import net.minecraft.util.maths.Vec3d;
 import org.lwjgl.util.vector.Vector2f;
 
 import javax.annotation.Nullable;
@@ -18,7 +19,7 @@ public interface ExtendedSender extends Sender {
 
     Level getWorld();
 
-    Vec3i getPosition();
+    Vec3d getPosition();
 
     Vector2f getRotation();
 

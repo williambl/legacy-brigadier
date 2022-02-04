@@ -10,7 +10,6 @@ import org.lwjgl.util.vector.Vector2f;
 
 @Environment(EnvType.SERVER)
 public class Coordinate {
-
     final CoordinatePart x;
     final CoordinatePart y;
     final CoordinatePart z;
@@ -22,19 +21,33 @@ public class Coordinate {
     }
 
     /**
+     * Get the {@link Vec3d} of the absolute position represented by this Coordinate.
+     * @param commandSource the commandSource whose position will be used to resolve relative coordinates.
+     * @return the {@link Vec3d} of the position.
+     */
+    public Vec3d getVec3d(ExtendedSender commandSource) {
+        Vec3d sourceCoords = commandSource.getPosition();
+        if (this.x.type == CoordinateType.LOCAL) {
+            return fromLocal(commandSource);
+        }
+        return Vec3d.getOrCreate(resolve(x, sourceCoords.x), resolve(y, sourceCoords.y), resolve(z, sourceCoords.z));
+    }
+
+    /**
      * Get the {@link Vec3i} of the absolute position represented by this Coordinate.
      * @param commandSource the commandSource whose position will be used to resolve relative coordinates.
      * @return the {@link Vec3i} of the position.
      */
     public Vec3i getVec3i(ExtendedSender commandSource) {
-        Vec3i sourceCoords = commandSource.getPosition();
+        Vec3d sourceCoords = commandSource.getPosition();
         if (this.x.type == CoordinateType.LOCAL) {
-            return fromLocal(commandSource);
+            Vec3d res = fromLocal(commandSource);
+            new Vec3i((int) res.x, (int) res.y, (int) res.z);
         }
-        return new Vec3i(resolve(x, sourceCoords.x), resolve(y, sourceCoords.y), resolve(z, sourceCoords.z));
+        return new Vec3i((int) resolve(x, sourceCoords.x), (int) resolve(y, sourceCoords.y), (int) resolve(z, sourceCoords.z));
     }
 
-    private Vec3i fromLocal(ExtendedSender source) {
+    private Vec3d fromLocal(ExtendedSender source) {
         Vector2f vec2f = source.getRotation();
         Vec3d vec3d = Vec3d.getOrCreate(source.getPosition().x, source.getPosition().y, source.getPosition().z);
         float f = MathsHelper.cos((vec2f.y + 90.0F) * 0.017453292F);
@@ -49,7 +62,7 @@ public class Coordinate {
         double d = vec3d2.x * this.z.coord + vec3d3.x * this.y.coord + vec3d4.x * this.x.coord;
         double e = vec3d2.y * this.z.coord + vec3d3.y * this.y.coord + vec3d4.y * this.x.coord;
         double l = vec3d2.z * this.z.coord + vec3d3.z * this.y.coord + vec3d4.z * this.x.coord;
-        return new Vec3i((int) (vec3d.x + d), (int) (vec3d.y + e), (int) (vec3d.z + l));
+        return Vec3d.getOrCreate((vec3d.x + d), (vec3d.y + e), (vec3d.z + l));
     }
 
     private static Vec3d multiply(Vec3d original, double amount) {
@@ -60,12 +73,12 @@ public class Coordinate {
         return Vec3d.getOrCreate(orig.y * arg.z - orig.z * arg.y, orig.z * arg.x - orig.x * arg.z, orig.x * arg.y - orig.y * arg.x);
     }
 
-    private static int resolve(CoordinatePart part, int relativeTo) {
+    private static double resolve(CoordinatePart part, double relativeTo) {
         return part.type == CoordinateType.RELATIVE ? part.coord + relativeTo : part.coord;
     }
 
     public static class CoordinatePart {
-        final int coord;
+        final double coord;
         final CoordinateType type;
 
         public CoordinatePart(int coord, CoordinateType type) {
