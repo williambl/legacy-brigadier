@@ -45,15 +45,21 @@ public final class StringReaderUtils {
     }
 
     public static Coordinate.CoordinatePart readCoordinatePart(StringReader reader) throws CommandSyntaxException {
-        boolean isRelative = false;
+        Coordinate.CoordinateType type = Coordinate.CoordinateType.ABSOLUTE;
         if (reader.peek() == '~') {
-            isRelative = true;
+            type = Coordinate.CoordinateType.RELATIVE;
             reader.skip();
             if (reader.peek() == ' ')
-                return new Coordinate.CoordinatePart(0, true);
+                return new Coordinate.CoordinatePart(0, type);
+        } else if (reader.peek() == '^') {
+            type = Coordinate.CoordinateType.LOCAL;
+            reader.skip();
+            if (reader.peek() == ' ')
+                return new Coordinate.CoordinatePart(0, type);
         }
+
         int coordinate = reader.readInt();
 
-        return new Coordinate.CoordinatePart(coordinate, isRelative);
+        return new Coordinate.CoordinatePart(coordinate, type);
     }
 }

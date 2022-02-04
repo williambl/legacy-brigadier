@@ -4,6 +4,9 @@ import com.williambl.legacybrigadier.api.command.ExtendedSender;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.util.Vec3i;
+import net.minecraft.util.maths.MathsHelper;
+import net.minecraft.util.maths.Vec3d;
+import org.lwjgl.util.vector.Vector2f;
 
 @Environment(EnvType.SERVER)
 public class Coordinate {
@@ -25,21 +28,70 @@ public class Coordinate {
      */
     public Vec3i getVec3i(ExtendedSender commandSource) {
         Vec3i sourceCoords = commandSource.getPosition();
+        if (this.x.type == CoordinateType.LOCAL) {
+            return fromLocal(commandSource);
+        }
         return new Vec3i(resolve(x, sourceCoords.x), resolve(y, sourceCoords.y), resolve(z, sourceCoords.z));
     }
 
+    private Vec3i fromLocal(ExtendedSender source) {
+        Vector2f vec2f = source.getRotation();
+        Vec3d vec3d = Vec3d.getOrCreate(source.getPosition().x, source.getPosition().y, source.getPosition().z);
+        float f = MathsHelper.cos((vec2f.y + 90.0F) * 0.017453292F);
+        float g = MathsHelper.sin((vec2f.y + 90.0F) * 0.017453292F);
+        float h = MathsHelper.cos(-vec2f.x * 0.017453292F);
+        float i = MathsHelper.sin(-vec2f.x * 0.017453292F);
+        float j = MathsHelper.cos((-vec2f.x + 90.0F) * 0.017453292F);
+        float k = MathsHelper.sin((-vec2f.x + 90.0F) * 0.017453292F);
+        Vec3d vec3d2 = Vec3d.getOrCreate(f * h, i, g * h);
+        Vec3d vec3d3 = Vec3d.getOrCreate(f * j, k, g * j);
+        Vec3d vec3d4 = multiply(crossProduct(vec3d2, vec3d3), -1.0D);
+        double d = vec3d2.x * this.z.coord + vec3d3.x * this.y.coord + vec3d4.x * this.x.coord;
+        double e = vec3d2.y * this.z.coord + vec3d3.y * this.y.coord + vec3d4.y * this.x.coord;
+        double l = vec3d2.z * this.z.coord + vec3d3.z * this.y.coord + vec3d4.z * this.x.coord;
+        return new Vec3i((int) (vec3d.x + d), (int) (vec3d.y + e), (int) (vec3d.z + l));
+    }
+
+    private static Vec3d multiply(Vec3d original, double amount) {
+        return Vec3d.getOrCreate(original.x*amount, original.y*amount, original.z*amount);
+    }
+
+    private static Vec3d crossProduct(Vec3d orig, Vec3d arg) {
+        return Vec3d.getOrCreate(orig.y * arg.z - orig.z * arg.y, orig.z * arg.x - orig.x * arg.z, orig.x * arg.y - orig.y * arg.x);
+    }
+
     private static int resolve(CoordinatePart part, int relativeTo) {
-        return part.isRelative ? part.coord + relativeTo : part.coord;
+        return part.type == CoordinateType.RELATIVE ? part.coord + relativeTo : part.coord;
     }
 
     public static class CoordinatePart {
         final int coord;
-        final boolean isRelative;
+        final CoordinateType type;
 
-        public CoordinatePart(int coord, boolean isRelative) {
+        public CoordinatePart(int coord, CoordinateType type) {
             this.coord = coord;
-            this.isRelative = isRelative;
+            this.type = type;
+        }
+
+        /**
+         * Checks that either all are {@link CoordinateType#LOCAL LOCAL}, or none are.
+         *
+         * @param x the first coordinate part
+         * @param y the second coordinate part
+         * @param z the third coordinate part
+         *
+         * @return whether all three match in locality
+         */
+        public static boolean allMatchLocality(CoordinatePart x, CoordinatePart y, CoordinatePart z) {
+            return (x.type != CoordinateType.LOCAL || y.type == CoordinateType.LOCAL && z.type == CoordinateType.LOCAL)
+                    && (y.type != CoordinateType.LOCAL || x.type == CoordinateType.LOCAL)
+                    && (z.type != CoordinateType.LOCAL || x.type == CoordinateType.LOCAL);
         }
     }
 
+    public enum CoordinateType {
+        ABSOLUTE,
+        RELATIVE,
+        LOCAL
+    }
 }

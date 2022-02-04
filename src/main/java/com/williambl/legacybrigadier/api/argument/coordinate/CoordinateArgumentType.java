@@ -15,12 +15,14 @@ import net.fabricmc.api.Environment;
 import javax.annotation.Nonnull;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.concurrent.CompletableFuture;
 
 @Environment(EnvType.SERVER)
 public class CoordinateArgumentType implements ArgumentType<Coordinate> {
     private static final Collection<String> EXAMPLES = Arrays.asList("0 0 0", "~ ~ ~", "1 2 3");
     public static final SimpleCommandExceptionType INCOMPLETE_EXCEPTION = new SimpleCommandExceptionType(new LiteralMessage("Incomplete position"));
+    public static final SimpleCommandExceptionType LOCALITY_ERROR = new SimpleCommandExceptionType(new LiteralMessage("Illegal mixing of local (^) and non-local coordinates"));
 
     /**
      * Create a new Coordinate argument.
@@ -43,14 +45,22 @@ public class CoordinateArgumentType implements ArgumentType<Coordinate> {
 
     @Override
     public Coordinate parse(StringReader stringReader) throws CommandSyntaxException {
-        int cursor = stringReader.getCursor();
-        Coordinate.CoordinatePart x = StringReaderUtils.readCoordinatePart(stringReader);
+        final int cursor = stringReader.getCursor();
+        final Coordinate.CoordinatePart x = StringReaderUtils.readCoordinatePart(stringReader);
+
         if (stringReader.canRead() && stringReader.peek() == ' ') {
             stringReader.skip();
-            Coordinate.CoordinatePart y = StringReaderUtils.readCoordinatePart(stringReader);
+            final Coordinate.CoordinatePart y = StringReaderUtils.readCoordinatePart(stringReader);
+
             if (stringReader.canRead() && stringReader.peek() == ' ') {
                 stringReader.skip();
-                Coordinate.CoordinatePart z = StringReaderUtils.readCoordinatePart(stringReader);
+                final Coordinate.CoordinatePart z = StringReaderUtils.readCoordinatePart(stringReader);
+
+                if (!Coordinate.CoordinatePart.allMatchLocality(x, y, z)) {
+                    stringReader.setCursor(cursor);
+                    throw LOCALITY_ERROR.createWithContext(stringReader);
+                }
+
                 return new Coordinate(x, y, z);
             } else {
                 stringReader.setCursor(cursor);
@@ -65,7 +75,12 @@ public class CoordinateArgumentType implements ArgumentType<Coordinate> {
 
     @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-        builder.suggest("~ ~ ~");
+        String string = builder.getRemaining();
+        if (!string.isEmpty() && string.charAt(0) == '^') {
+            builder.suggest("^ ^ ^");
+        } else {
+            builder.suggest("~ ~ ~");
+        }
         return builder.buildFuture();
     }
 

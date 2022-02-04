@@ -16,6 +16,7 @@ import net.minecraft.server.command.CommandSource;
 import net.minecraft.server.gui.ServerGUI;
 import net.minecraft.server.network.ServerPlayPacketHandler;
 import net.minecraft.util.Vec3i;
+import org.lwjgl.util.vector.Vector2f;
 
 import javax.annotation.Nullable;
 import java.util.HashSet;
@@ -50,6 +51,15 @@ public class WrappedServerCommandSender implements ExtendedSender {
         }
 
         return new Vec3i(0, 0, 0);
+    }
+
+    @Override
+    public Vector2f getRotation() {
+        Player player = this.wrapped.getPlayer();
+        if (player != null) {
+            return new Vector2f(player.pitch, player.yaw);
+        }
+        return new Vector2f(0f, 0f);
     }
 
     @Override
