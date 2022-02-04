@@ -1,134 +1,125 @@
 package com.williambl.legacybrigadier.api.argument.playerselector;
 
+import com.mojang.brigadier.LiteralMessage;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.williambl.legacybrigadier.api.command.ExtendedSender;
-import com.williambl.legacybrigadier.impl.server.mixinhooks.ServerPlayPacketHandlerHooks;
+import com.williambl.legacybrigadier.api.utils.EntityUtils;
+import com.williambl.legacybrigadier.impl.server.argument.SelfSelector;
 import com.williambl.legacybrigadier.impl.server.utils.UncheckedCaster;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.Player;
 import net.minecraft.level.Level;
-import net.minecraft.server.network.ServerPlayPacketHandler;
 
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
+import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Environment(EnvType.SERVER)
-public class TargetSelector {
-    private final String selectorString;
-    private final PlayerSelectorType type;
+public class TargetSelector<E extends Entity> implements Predicate<Entity> {
+    private static final SimpleCommandExceptionType INVALID_TARGET_SELECTOR = new SimpleCommandExceptionType(new LiteralMessage("Invalid Target Selector"));
+    private final Class<E> clazz;
+    private final String name;
+    private final int limit;
+    private final SortingMethod sortingMethod;
 
-    TargetSelector(String selectorString) {
-        this.selectorString = selectorString;
-        switch (selectorString.toLowerCase()) {
-            case "@a":
-                type = PlayerSelectorType.A;
-                break;
-            case "@p":
-                type = PlayerSelectorType.P;
-                break;
-            case "@e":
-                type = PlayerSelectorType.E;
-                break;
-            default:
-                type = PlayerSelectorType.RAW;
-                break;
-        }
+    protected TargetSelector(Class<E> clazz, String name, int limit, SortingMethod sortingMethod) {
+        this.clazz = clazz;
+        this.name = name;
+        this.limit = limit;
+        this.sortingMethod = sortingMethod;
     }
 
-    /**
-     * Get the raw selector string.
-     * @return the selector.
-     */
-    public String getSelectorString() {
-        return selectorString;
+    public static TargetSelector<?> literal(String name) throws CommandSyntaxException {
+        return new TargetSelector<>(Entity.class, name, 1, SortingMethod.RANDOM);
     }
 
-    /**
-     * Get the names of all players in the same level as the given {@link ExtendedSender}. If the Sender is levelless, all
-     * players in the server are retrieved.
-     * @param commandSource the {@link ExtendedSender} whose level will be used.
-     * @return the list of player names.
-     */
-    public List<String> getEntityNames(ExtendedSender commandSource) {
-        List<String> result = new ArrayList<>();
-        switch (type) {
-            case RAW:
-                result.add(selectorString);
-                break;
-            case A: {
-                Level level = (commandSource).getWorld();
-                if (level != null) {
-                    List<Player> players = UncheckedCaster.list(level.players);
-                    players.forEach(it -> result.add(it.name));
-                } else {
-                    List<Player> players = UncheckedCaster.list((commandSource).getServer().playerManager.players);
-                    players.forEach(it -> result.add(it.name));
-                }
-                break;
+    public static TargetSelector<?> create(char selectorType, String options) throws CommandSyntaxException {
+        switch (selectorType) {
+            case 'a': {
+                return new TargetSelector<>(Player.class, null, Integer.MAX_VALUE, SortingMethod.RANDOM);
             }
-            case P:
-                result.add(commandSource.getName());
-                break;
-            case E: {
-                Level level = commandSource.getWorld();
-                List<Entity> entities;
-                if (level != null) {
-                    entities = UncheckedCaster.list(level.entities);
-                } else {
-                    entities = UncheckedCaster.list(Arrays.stream((commandSource).getServer().levels).flatMap(l -> UncheckedCaster.list(l.entities).stream()).collect(Collectors.toList()));
-                }
-                result.addAll(entities.stream().map(Object::toString).collect(Collectors.toList()));
+            case 'p': {
+                return new TargetSelector<>(Player.class, null, 1, SortingMethod.NEAREST);
+            }
+            case 'r': {
+                return new TargetSelector<>(Player.class, null, 1, SortingMethod.RANDOM);
+            }
+            case 'e': {
+                return new TargetSelector<>(Entity.class, null, Integer.MAX_VALUE, SortingMethod.RANDOM);
+            }
+            case 's': {
+                return new SelfSelector();
+            }
+            default: {
+                throw INVALID_TARGET_SELECTOR.create();
             }
         }
-        return result;
     }
 
-    /**
-     * Get all players in the same level as the given {@link ExtendedSender}. If the Sender is levelless, all
-     * players in the server are retrieved.
-     * @param sender the {@link ExtendedSender} whose level will be used.
-     * @return the list of players.
-     */
-    public List<Entity> getEntities(ExtendedSender sender) {
-        List<Entity> result = new ArrayList<>();
+    public boolean isPlayerOnly() {
+        return Player.class.isAssignableFrom(this.clazz);
+    }
+
+    public boolean isSingleOnly() {
+        return this.limit == 1;
+    }
+
+    @Override
+    public boolean test(Entity entity) {
+        return entity.getClass().isAssignableFrom(this.clazz) && (this.name == null || this.name.equals(EntityUtils.getName(entity)));
+    }
+
+    public List<E> getEntities(ExtendedSender sender) {
+        return this.getMatchingEntities(sender);
+    }
+
+    public List<String> getNames(ExtendedSender sender) {
+        return this.getEntities(sender).stream().map(EntityUtils::getName).collect(Collectors.toList());
+    }
+
+    protected List<E> getMatchingEntities(ExtendedSender sender) {
+        return getAllEntities(sender).stream()
+                .filter(clazz::isInstance)
+                .map(clazz::cast)
+                .filter(this)
+                .sorted(sortingMethod.getComparator(sender))
+                .limit(limit)
+                .collect(Collectors.toList());
+    }
+
+    protected static List<Entity> getAllEntities(ExtendedSender sender) {
         Level level = sender.getWorld();
-        List<Player> players;
-        List<Entity> entities;
         if (level != null) {
-            players = UncheckedCaster.list(level.players);
-            entities = UncheckedCaster.list(level.entities);
+            return UncheckedCaster.list(level.entities);
         } else {
-            players = UncheckedCaster.list((sender).getServer().playerManager.players);
-            entities = UncheckedCaster.list(Arrays.stream((sender).getServer().levels).flatMap(l -> UncheckedCaster.list(l.entities).stream()).collect(Collectors.toList()));
+            return UncheckedCaster.list(Arrays.stream((sender).getServer().levels).flatMap(l -> UncheckedCaster.list(l.entities).stream()).collect(Collectors.toList()));
         }
-        switch (type) {
-            case RAW:
-                for (Player player : players) {
-                    if (player.name.equals(selectorString))
-                        result.add(player);
-                }
-                break;
-            case A:
-                result.addAll(players);
-                break;
-            case P:
-                if (sender.getPlayer() != null)
-                    result.add(sender.getPlayer());
-                break;
-            case E:
-                result.addAll(entities);
-                break;
-        }
-        return result;
     }
 
-    private enum PlayerSelectorType {
-        RAW,
-        A,
-        P,
-        E
+    public enum SortingMethod {
+        NEAREST(sender ->
+            Comparator.comparingDouble(e -> EntityUtils.distanceBetween(e, sender.getPosition()))
+        ),
+        RANDOM(sender -> {
+            int randomValue = sender.getWorld().rand.nextInt();
+            return Comparator.<Entity>comparingInt(e -> e.hashCode()^randomValue)
+                    .thenComparing(NEAREST.getComparator(sender)); // if they have the same hash code, just resort to nearest
+        });
+
+        private final Function<ExtendedSender, Comparator<Entity>> implementation;
+
+        SortingMethod(Function<ExtendedSender, Comparator<Entity>> implementation) {
+            this.implementation = implementation;
+        }
+
+        public Comparator<Entity> getComparator(ExtendedSender sender) {
+            return implementation.apply(sender);
+        }
     }
 }

@@ -3,6 +3,7 @@ package com.williambl.legacybrigadier.impl.server.utils;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.williambl.legacybrigadier.api.argument.coordinate.Coordinate;
+import com.williambl.legacybrigadier.api.argument.playerselector.TargetSelector;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 
@@ -20,12 +21,26 @@ public final class StringReaderUtils {
         return StringReader.isAllowedInUnquotedString(c) || c == '*';
     }
 
-    public static String readTargetSelector(StringReader reader) {
+    public static TargetSelector<?> readTargetSelector(StringReader reader) throws CommandSyntaxException {
         final int start = reader.getCursor();
-        while (reader.canRead() && isAllowedInTargetSelector(reader.peek())) {
+        if (reader.peek() == '@') {
             reader.skip();
+            final char selectorType = reader.read();
+            final String options;
+            if (reader.peek() == '[') {
+                reader.skip();
+                options = reader.readStringUntil(']');
+            } else {
+                options = "";
+            }
+            return TargetSelector.create(selectorType, options);
+        } else {
+            while (reader.canRead() && isAllowedInTargetSelector(reader.peek())) {
+                reader.skip();
+            }
+
+            return TargetSelector.literal(reader.getString().substring(start, reader.getCursor()));
         }
-        return reader.getString().substring(start, reader.getCursor());
     }
 
     public static String readId(StringReader reader) {

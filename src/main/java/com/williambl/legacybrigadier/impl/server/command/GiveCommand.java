@@ -25,7 +25,7 @@ public class GiveCommand implements CommandProvider {
     public LiteralArgumentBuilder<ExtendedSender> get() {
         return LiteralArgumentBuilder.<ExtendedSender>literal("give")
                 .requires(permission("command.give"))
-                .then(RequiredArgumentBuilder.<ExtendedSender, TargetSelector>argument("player", entities())
+                .then(RequiredArgumentBuilder.<ExtendedSender, TargetSelector<?>>argument("player", entities())
                         .then(RequiredArgumentBuilder.<ExtendedSender, ItemId>argument("item", itemId())
                                 .executes(this::giveItem)
                                 .then(RequiredArgumentBuilder.<ExtendedSender, Integer>argument("count", integer(0, 64))
