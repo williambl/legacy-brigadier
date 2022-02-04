@@ -81,7 +81,7 @@ public class Coordinate {
         final double coord;
         final CoordinateType type;
 
-        public CoordinatePart(int coord, CoordinateType type) {
+        public CoordinatePart(double coord, CoordinateType type) {
             this.coord = coord;
             this.type = type;
         }

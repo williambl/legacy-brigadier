@@ -15,7 +15,6 @@ import net.fabricmc.api.Environment;
 import javax.annotation.Nonnull;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.concurrent.CompletableFuture;
 
 @Environment(EnvType.SERVER)
@@ -24,13 +23,28 @@ public class CoordinateArgumentType implements ArgumentType<Coordinate> {
     public static final SimpleCommandExceptionType INCOMPLETE_EXCEPTION = new SimpleCommandExceptionType(new LiteralMessage("Incomplete position"));
     public static final SimpleCommandExceptionType LOCALITY_ERROR = new SimpleCommandExceptionType(new LiteralMessage("Illegal mixing of local (^) and non-local coordinates"));
 
+    private final boolean isIntOnly;
+
+    private CoordinateArgumentType(boolean isIntOnly) {
+        this.isIntOnly = isIntOnly;
+    }
+
     /**
      * Create a new Coordinate argument.
      * @return a CoordinateArgumentType instance.
      */
     @Nonnull
     public static CoordinateArgumentType coordinate() {
-        return new CoordinateArgumentType();
+        return new CoordinateArgumentType(false);
+    }
+
+    /**
+     * Create a new Coordinate argument with integer-only precision.
+     * @return a CoordinateArgumentType instance.
+     */
+    @Nonnull
+    public static CoordinateArgumentType intCoordinate() {
+        return new CoordinateArgumentType(true);
     }
 
     /**
@@ -46,15 +60,15 @@ public class CoordinateArgumentType implements ArgumentType<Coordinate> {
     @Override
     public Coordinate parse(StringReader stringReader) throws CommandSyntaxException {
         final int cursor = stringReader.getCursor();
-        final Coordinate.CoordinatePart x = StringReaderUtils.readCoordinatePart(stringReader);
+        final Coordinate.CoordinatePart x = StringReaderUtils.readCoordinatePart(stringReader, this.isIntOnly);
 
         if (stringReader.canRead() && stringReader.peek() == ' ') {
             stringReader.skip();
-            final Coordinate.CoordinatePart y = StringReaderUtils.readCoordinatePart(stringReader);
+            final Coordinate.CoordinatePart y = StringReaderUtils.readCoordinatePart(stringReader, this.isIntOnly);
 
             if (stringReader.canRead() && stringReader.peek() == ' ') {
                 stringReader.skip();
-                final Coordinate.CoordinatePart z = StringReaderUtils.readCoordinatePart(stringReader);
+                final Coordinate.CoordinatePart z = StringReaderUtils.readCoordinatePart(stringReader, this.isIntOnly);
 
                 if (!Coordinate.CoordinatePart.allMatchLocality(x, y, z)) {
                     stringReader.setCursor(cursor);

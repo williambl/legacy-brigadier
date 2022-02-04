@@ -1,5 +1,6 @@
 package com.williambl.legacybrigadier.impl.server.command;
 
+import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
@@ -13,8 +14,7 @@ import net.minecraft.util.Vec3i;
 
 import static com.mojang.brigadier.arguments.IntegerArgumentType.getInteger;
 import static com.mojang.brigadier.arguments.IntegerArgumentType.integer;
-import static com.williambl.legacybrigadier.api.argument.coordinate.CoordinateArgumentType.coordinate;
-import static com.williambl.legacybrigadier.api.argument.coordinate.CoordinateArgumentType.getCoordinate;
+import static com.williambl.legacybrigadier.api.argument.coordinate.CoordinateArgumentType.*;
 import static com.williambl.legacybrigadier.api.argument.tileid.TileIdArgumentType.getTileId;
 import static com.williambl.legacybrigadier.api.argument.tileid.TileIdArgumentType.tileId;
 import static com.williambl.legacybrigadier.api.predicate.HasPermission.permission;
@@ -27,7 +27,7 @@ public class SetTileCommand implements CommandProvider {
         return LiteralArgumentBuilder.<ExtendedSender>literal("settile")
                 .requires(permission("command.settile"))
                 .requires(isWorldly())
-                .then(RequiredArgumentBuilder.<ExtendedSender, Coordinate>argument("pos", coordinate())
+                .then(RequiredArgumentBuilder.<ExtendedSender, Coordinate>argument("pos", intCoordinate())
                         .then(RequiredArgumentBuilder.<ExtendedSender, TileId>argument("id", tileId())
                                 .executes(this::placeBlock)
                                 .then(RequiredArgumentBuilder.<ExtendedSender, Integer>argument("meta", integer())

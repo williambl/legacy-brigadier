@@ -44,7 +44,7 @@ public final class StringReaderUtils {
         return reader.getString().substring(start, reader.getCursor());
     }
 
-    public static Coordinate.CoordinatePart readCoordinatePart(StringReader reader) throws CommandSyntaxException {
+    public static Coordinate.CoordinatePart readCoordinatePart(StringReader reader, boolean isIntOnly) throws CommandSyntaxException {
         Coordinate.CoordinateType type = Coordinate.CoordinateType.ABSOLUTE;
         if (reader.peek() == '~') {
             type = Coordinate.CoordinateType.RELATIVE;
@@ -58,7 +58,7 @@ public final class StringReaderUtils {
                 return new Coordinate.CoordinatePart(0, type);
         }
 
-        int coordinate = reader.readInt();
+        double coordinate = isIntOnly ? reader.readInt() : reader.readDouble();
 
         return new Coordinate.CoordinatePart(coordinate, type);
     }
