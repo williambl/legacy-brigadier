@@ -11,6 +11,7 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import com.williambl.legacybrigadier.impl.server.utils.StringReaderUtils;
 import io.github.minecraftcursedlegacy.api.registry.Id;
 import io.github.minecraftcursedlegacy.api.registry.Registries;
+import io.github.minecraftcursedlegacy.impl.registry.EntityType;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 
@@ -21,7 +22,7 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 @Environment(EnvType.SERVER)
-public class EntityIdArgumentType implements ArgumentType<EntityId> {
+public class EntityTypeArgumentType implements ArgumentType<EntityType> {
 
     private static final Collection<String> EXAMPLES = Arrays.asList("Pig", "Creeper", "Spider");
 
@@ -37,23 +38,23 @@ public class EntityIdArgumentType implements ArgumentType<EntityId> {
         return validValues;
     }
 
-    public static EntityIdArgumentType entityId() {
-        return new EntityIdArgumentType();
+    public static EntityTypeArgumentType entityType() {
+        return new EntityTypeArgumentType();
     }
 
-    public static EntityId getEntityId(final CommandContext<?> context, final String name) {
-        return context.getArgument(name, EntityId.class);
+    public static EntityType getEntityType(final CommandContext<?> context, final String name) {
+        return context.getArgument(name, EntityType.class);
     }
 
     @Override
-    public EntityId parse(StringReader reader) throws CommandSyntaxException {
+    public EntityType parse(StringReader reader) throws CommandSyntaxException {
         int cursor = reader.getCursor();
-        String id = StringReaderUtils.readId(reader);
-        if (!getValidValues().contains(new Id(id))) {
+        Id id = new Id(StringReaderUtils.readId(reader));
+        if (!getValidValues().contains(id)) {
             reader.setCursor(cursor);
             throw NOT_VALID_ID.createWithContext(reader);
         }
-        return new EntityId(id);
+        return Registries.ENTITY_TYPE.getById(id);
     }
 
     @Override
