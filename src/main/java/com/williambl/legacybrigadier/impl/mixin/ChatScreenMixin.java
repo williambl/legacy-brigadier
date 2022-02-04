@@ -19,9 +19,11 @@ import java.util.List;
 @Mixin(ChatScreen.class)
 @Environment(EnvType.CLIENT)
 public abstract class ChatScreenMixin implements ChatScreenHooks {
+    @Override
     @Accessor("field_786")
     public abstract String getMessage();
 
+    @Override
     @Accessor("field_786")
     public abstract void setMessage(String newMessage);
 
@@ -79,7 +81,7 @@ public abstract class ChatScreenMixin implements ChatScreenHooks {
         invalidateSuggestions();
     }
 
-    @Inject(method = "keyPressed", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/AbstractClientPlayer;sendChatMessage(Ljava/lang/String;)V"))
+    @Inject(method = "keyPressed", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/ClientPlayer;sendChatMessage(Ljava/lang/String;)V"))
     void addMessageToQueue(char c, int i, CallbackInfo ci) {
         LegacyBrigadierClient.previousMessages.add(0, getMessage().trim());
     }

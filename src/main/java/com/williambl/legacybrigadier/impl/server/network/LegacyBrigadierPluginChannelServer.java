@@ -3,15 +3,18 @@ package com.williambl.legacybrigadier.impl.server.network;
 import com.mojang.brigadier.ParseResults;
 import com.mojang.brigadier.suggestion.Suggestion;
 import com.mojang.brigadier.suggestion.Suggestions;
+import com.williambl.legacybrigadier.api.command.ExtendedSender;
+import com.williambl.legacybrigadier.impl.mixin.ServerPlayPacketHandlerAccessor;
 import com.williambl.legacybrigadier.impl.server.LegacyBrigadierServer;
-import com.williambl.legacybrigadier.impl.server.mixinhooks.ServerPlayerPacketHandlerHooks;
+import com.williambl.legacybrigadier.impl.server.mixinhooks.ServerPlayPacketHandlerHooks;
 import io.github.minecraftcursedlegacy.api.networking.PluginChannel;
 import io.github.minecraftcursedlegacy.api.registry.Id;
+import io.github.minecraftcursedlegacy.impl.command.PlayerSender;
+import io.github.minecraftcursedlegacy.impl.command.ServerCommandSender;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.PacketHandler;
-import net.minecraft.server.command.CommandSource;
-import net.minecraft.server.network.ServerPlayerPacketHandler;
+import net.minecraft.server.network.ServerPlayPacketHandler;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -30,9 +33,9 @@ public class LegacyBrigadierPluginChannelServer extends PluginChannel {
 
     @Override
     public void onReceive(PacketHandler packetHandler, byte[] bytes) {
-        if (packetHandler instanceof ServerPlayerPacketHandler) {
+        if (packetHandler instanceof ServerPlayPacketHandler) {
             String incompleteCommand = new String(bytes, StandardCharsets.UTF_8);
-            ParseResults<CommandSource> parseResults = LegacyBrigadierServer.dispatcher.parse(incompleteCommand, (ServerPlayerPacketHandler) packetHandler);
+            ParseResults<ExtendedSender> parseResults = LegacyBrigadierServer.dispatcher.parse(incompleteCommand, ExtendedSender.extend(new ServerCommandSender((ServerPlayPacketHandler) packetHandler)));
             Suggestions suggestions;
             try {
                 suggestions = LegacyBrigadierServer.dispatcher.getCompletionSuggestions(parseResults).get();
@@ -41,7 +44,7 @@ public class LegacyBrigadierPluginChannelServer extends PluginChannel {
                 return;
             }
             if (suggestions.getList().size() > 0)
-                send(stringsToBytes(applySuggestions(incompleteCommand, suggestions.getList())), ((ServerPlayerPacketHandlerHooks)packetHandler).getPlayer());
+                send(stringsToBytes(applySuggestions(incompleteCommand, suggestions.getList())), ((ServerPlayPacketHandlerHooks)packetHandler).getPlayer());
         }
     }
 

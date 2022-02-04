@@ -1,7 +1,7 @@
 package com.williambl.legacybrigadier.impl.mixin;
 
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.ServerGUI;
+import net.minecraft.server.gui.ServerGUI;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 

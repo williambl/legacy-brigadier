@@ -8,7 +8,6 @@ import net.fabricmc.api.Environment;
 
 @Environment(EnvType.SERVER)
 public final class StringReaderUtils {
-
     private static boolean isAllowedInTargetSelector(final char c) {
         return StringReader.isAllowedInUnquotedString(c) || c == '@';
     }

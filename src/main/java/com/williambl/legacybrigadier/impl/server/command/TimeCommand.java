@@ -5,11 +5,10 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.williambl.legacybrigadier.api.command.CommandProvider;
-import com.williambl.legacybrigadier.impl.server.mixinhooks.CommandSourceHooks;
+import com.williambl.legacybrigadier.api.command.ExtendedSender;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.level.Level;
-import net.minecraft.server.command.CommandSource;
 
 import java.util.function.Function;
 
@@ -22,36 +21,36 @@ import static com.williambl.legacybrigadier.api.predicate.IsWorldly.isWorldly;
 public class TimeCommand implements CommandProvider {
 
     @Override
-    public LiteralArgumentBuilder<CommandSource> get() {
-        return LiteralArgumentBuilder.<CommandSource>literal("time")
+    public LiteralArgumentBuilder<ExtendedSender> get() {
+        return LiteralArgumentBuilder.<ExtendedSender>literal("time")
                 .requires(permission("command.time"))
                 .requires(isWorldly())
                 .then(
-                        LiteralArgumentBuilder.<CommandSource>literal("set")
-                                .then(RequiredArgumentBuilder.<CommandSource, Long>argument("time", longArg(0))
+                        LiteralArgumentBuilder.<ExtendedSender>literal("set")
+                                .then(RequiredArgumentBuilder.<ExtendedSender, Long>argument("time", longArg(0))
                                         .executes(setTime(context -> getLong(context, "time")))
-                                ).then(LiteralArgumentBuilder.<CommandSource>literal("day")
+                                ).then(LiteralArgumentBuilder.<ExtendedSender>literal("day")
                                         .executes(setTime(a -> 0L))
-                                ).then(LiteralArgumentBuilder.<CommandSource>literal("noon")
+                                ).then(LiteralArgumentBuilder.<ExtendedSender>literal("noon")
                                         .executes(setTime(a -> 6000L))
-                                ).then(LiteralArgumentBuilder.<CommandSource>literal("night")
+                                ).then(LiteralArgumentBuilder.<ExtendedSender>literal("night")
                                         .executes(setTime(a -> 12000L))
-                                ).then(LiteralArgumentBuilder.<CommandSource>literal("midnight")
+                                ).then(LiteralArgumentBuilder.<ExtendedSender>literal("midnight")
                                         .executes(setTime(a -> 18000L))
                                 )
                 )
                 .then(
-                        LiteralArgumentBuilder.<CommandSource>literal("get")
+                        LiteralArgumentBuilder.<ExtendedSender>literal("get")
                                 .executes(context -> {
-                                    sendFeedbackAndLog(context.getSource(), Long.toString(((CommandSourceHooks)context.getSource()).getWorld().getLevelTime()));
+                                    sendFeedbackAndLog(context.getSource(), Long.toString((context.getSource().getWorld().getLevelTime())));
                                     return 0;
                                 })
                 )
                 .then(
-                        LiteralArgumentBuilder.<CommandSource>literal("add")
-                                .then(RequiredArgumentBuilder.<CommandSource, Long>argument("time", longArg())
+                        LiteralArgumentBuilder.<ExtendedSender>literal("add")
+                                .then(RequiredArgumentBuilder.<ExtendedSender, Long>argument("time", longArg())
                                         .executes(context -> {
-                                            Level level = ((CommandSourceHooks)context.getSource()).getWorld();
+                                            Level level = (context.getSource()).getWorld();
                                             level.setLevelTime(level.getLevelTime()+getLong(context, "time"));
                                             sendFeedbackAndLog(context.getSource(), "Set time to " + level.getLevelTime());
                                             return 0;
@@ -59,10 +58,10 @@ public class TimeCommand implements CommandProvider {
                 );
     }
 
-    public Command<CommandSource> setTime(Function<CommandContext<CommandSource>, Long> time) {
+    public Command<ExtendedSender> setTime(Function<CommandContext<ExtendedSender>, Long> time) {
         return context -> {
             long timeValue = time.apply(context);
-            ((CommandSourceHooks) context.getSource()).getWorld().setLevelTime(timeValue);
+            ( context.getSource()).getWorld().setLevelTime(timeValue);
             sendFeedbackAndLog(context.getSource(), "Set time to " + timeValue);
             return 0;
         };

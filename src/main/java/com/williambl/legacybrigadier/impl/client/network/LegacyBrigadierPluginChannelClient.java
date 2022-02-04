@@ -7,7 +7,7 @@ import io.github.minecraftcursedlegacy.api.registry.Id;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.Screen;
-import net.minecraft.network.ClientPlayNetworkHandler;
+import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.network.PacketHandler;
 
 import java.nio.charset.StandardCharsets;

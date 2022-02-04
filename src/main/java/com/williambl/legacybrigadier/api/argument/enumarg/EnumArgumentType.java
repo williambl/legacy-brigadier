@@ -8,10 +8,10 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
+import com.williambl.legacybrigadier.api.command.ExtendedSender;
 import com.williambl.legacybrigadier.impl.server.utils.UncheckedCaster;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.server.command.CommandSource;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -32,7 +32,7 @@ public class EnumArgumentType<T extends Enum<T>> implements ArgumentType<T> {
         this.elements = theClazz.getEnumConstants();
     }
 
-    private List<String> getValidValues(CommandContext<CommandSource> context) {
+    private List<String> getValidValues(CommandContext<ExtendedSender> context) {
         List<String> validValues = new ArrayList<>();
         for (T element : elements) {
             validValues.add(element.name());

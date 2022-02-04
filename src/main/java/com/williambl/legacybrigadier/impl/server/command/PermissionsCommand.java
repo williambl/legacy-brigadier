@@ -4,11 +4,11 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.williambl.legacybrigadier.api.argument.playerselector.PlayerSelector;
 import com.williambl.legacybrigadier.api.command.CommandProvider;
+import com.williambl.legacybrigadier.api.command.ExtendedSender;
 import com.williambl.legacybrigadier.api.permission.PermissionManager;
 import com.williambl.legacybrigadier.api.permission.PermissionNode;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.server.command.CommandSource;
 
 import java.util.Set;
 
@@ -22,11 +22,11 @@ import static com.williambl.legacybrigadier.api.predicate.HasPermission.permissi
 public class PermissionsCommand implements CommandProvider {
 
     @Override
-    public LiteralArgumentBuilder<CommandSource> get() {
-        return LiteralArgumentBuilder.<CommandSource>literal("permissions")
+    public LiteralArgumentBuilder<ExtendedSender> get() {
+        return LiteralArgumentBuilder.<ExtendedSender>literal("permissions")
                 .requires(permission("command.permissions"))
-                .then(LiteralArgumentBuilder.<CommandSource>literal("get")
-                        .then(RequiredArgumentBuilder.<CommandSource, PlayerSelector>argument("player", player())
+                .then(LiteralArgumentBuilder.<ExtendedSender>literal("get")
+                        .then(RequiredArgumentBuilder.<ExtendedSender, PlayerSelector>argument("player", player())
                                 .executes(context -> {
                                     final StringBuilder builder = new StringBuilder();
                                     for (String playerName : getPlayer(context, "player").getPlayerNames(context.getSource())) {
@@ -40,14 +40,14 @@ public class PermissionsCommand implements CommandProvider {
                                         builder.append("\n");
                                     }
                                     builder.deleteCharAt(builder.length()-1); // Remove last newline
-                                    context.getSource().sendFeedback(builder.toString());
+                                    context.getSource().sendCommandFeedback(builder.toString());
                                     return 0;
                                 })
                         )
                 )
-                .then(LiteralArgumentBuilder.<CommandSource>literal("add")
-                        .then(RequiredArgumentBuilder.<CommandSource, PlayerSelector>argument("player", player())
-                                .then(RequiredArgumentBuilder.<CommandSource, PermissionNode>argument("node", permissionNode())
+                .then(LiteralArgumentBuilder.<ExtendedSender>literal("add")
+                        .then(RequiredArgumentBuilder.<ExtendedSender, PlayerSelector>argument("player", player())
+                                .then(RequiredArgumentBuilder.<ExtendedSender, PermissionNode>argument("node", permissionNode())
                                         .executes(context -> {
                                             final StringBuilder builder = new StringBuilder();
                                             final PermissionNode node = getPermissionNode(context, "node");
@@ -67,9 +67,9 @@ public class PermissionsCommand implements CommandProvider {
                                 )
                         )
                 )
-                .then(LiteralArgumentBuilder.<CommandSource>literal("remove")
-                        .then(RequiredArgumentBuilder.<CommandSource, PlayerSelector>argument("player", player())
-                                .then(RequiredArgumentBuilder.<CommandSource, PermissionNode>argument("node", permissionNode())
+                .then(LiteralArgumentBuilder.<ExtendedSender>literal("remove")
+                        .then(RequiredArgumentBuilder.<ExtendedSender, PlayerSelector>argument("player", player())
+                                .then(RequiredArgumentBuilder.<ExtendedSender, PermissionNode>argument("node", permissionNode())
                                         .executes(context -> {
                                             final StringBuilder builder = new StringBuilder();
                                             final PermissionNode node = getPermissionNode(context, "node");
@@ -77,7 +77,7 @@ public class PermissionsCommand implements CommandProvider {
                                                 final boolean success = PermissionManager.removeNodeFromName(playerName, node);
                                                 builder.append(success ? "Removed" : "Failed to remove");
                                                 builder.append(" node ");
-                                                builder.append(node.toString());
+                                                builder.append(node);
                                                 builder.append(" from ");
                                                 builder.append(playerName);
                                                 builder.append("\n");

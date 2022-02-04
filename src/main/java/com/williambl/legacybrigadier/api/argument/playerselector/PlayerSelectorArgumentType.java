@@ -7,7 +7,7 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-import com.williambl.legacybrigadier.impl.server.mixinhooks.CommandSourceHooks;
+import com.williambl.legacybrigadier.api.command.ExtendedSender;
 import com.williambl.legacybrigadier.impl.server.utils.StringReaderUtils;
 import com.williambl.legacybrigadier.impl.server.utils.UncheckedCaster;
 import net.fabricmc.api.EnvType;
@@ -31,7 +31,7 @@ public class PlayerSelectorArgumentType implements ArgumentType<PlayerSelector> 
     @SuppressWarnings("unchecked")
     private static List<String> getValidValues(CommandContext<CommandSource> context) {
         List<String> validValues = new ArrayList<>();
-        List<Player> players = ((CommandSourceHooks)context.getSource()).getWorld().players;
+        List<Player> players = ((ExtendedSender)context.getSource()).getWorld().players;
         players.forEach(it -> validValues.add(it.name));
         validValues.add("@a");
         validValues.add("@p");

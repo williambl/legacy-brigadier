@@ -1,14 +1,13 @@
 package com.williambl.legacybrigadier.api.predicate;
 
-import com.williambl.legacybrigadier.impl.server.mixinhooks.CommandSourceHooks;
+import com.williambl.legacybrigadier.api.command.ExtendedSender;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.server.command.CommandSource;
 
 import java.util.function.Predicate;
 
 @Environment(EnvType.SERVER)
-public class IsWorldly implements Predicate<CommandSource> {
+public class IsWorldly implements Predicate<ExtendedSender> {
 
     private IsWorldly() {}
 
@@ -21,7 +20,7 @@ public class IsWorldly implements Predicate<CommandSource> {
     }
 
     @Override
-    public boolean test(CommandSource commandSource) {
-        return ((CommandSourceHooks)commandSource).getWorld() != null;
+    public boolean test(ExtendedSender commandSource) {
+        return commandSource.getWorld() != null;
     }
 }

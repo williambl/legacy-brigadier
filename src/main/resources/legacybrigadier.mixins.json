@@ -9,11 +9,10 @@
   ],
   "server": [
     "CommandManagerMixin",
-    "CommandSourceMixin",
-    "MinecraftServerMixin",
+    "ServerCommandSenderAccessor",
     "ServerConfigMixin",
     "ServerGUIAccessor",
-    "ServerPlayerPacketHandlerMixin"
+    "ServerPlayPacketHandlerAccessor"
   ],
   "injectors": {
     "defaultRequire": 1

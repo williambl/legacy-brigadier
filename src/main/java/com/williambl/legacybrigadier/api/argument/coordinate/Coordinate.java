@@ -1,6 +1,6 @@
 package com.williambl.legacybrigadier.api.argument.coordinate;
 
-import com.williambl.legacybrigadier.impl.server.mixinhooks.CommandSourceHooks;
+import com.williambl.legacybrigadier.api.command.ExtendedSender;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.util.Vec3i;
@@ -23,7 +23,7 @@ public class Coordinate {
      * @param commandSource the commandSource whose position will be used to resolve relative coordinates.
      * @return the {@link Vec3i} of the position.
      */
-    public Vec3i getVec3i(CommandSourceHooks commandSource) {
+    public Vec3i getVec3i(ExtendedSender commandSource) {
         Vec3i sourceCoords = commandSource.getPosition();
         return new Vec3i(resolve(x, sourceCoords.x), resolve(y, sourceCoords.y), resolve(z, sourceCoords.z));
     }

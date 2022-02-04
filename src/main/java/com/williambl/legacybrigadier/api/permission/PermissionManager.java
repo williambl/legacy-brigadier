@@ -1,5 +1,6 @@
 package com.williambl.legacybrigadier.api.permission;
 
+import com.williambl.legacybrigadier.api.command.ExtendedSender;
 import com.williambl.legacybrigadier.impl.server.permission.PermissionManagerImpl;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -30,7 +31,7 @@ public final class PermissionManager {
      * @return a list of the source's permission nodes.
      */
     @Nonnull
-    public static Set<PermissionNode> getNodesForCommandSource(@Nonnull CommandSource source) {
+    public static Set<PermissionNode> getNodesForCommandSource(@Nonnull ExtendedSender source) {
         return getNodesForName(source.getName());
     }
 

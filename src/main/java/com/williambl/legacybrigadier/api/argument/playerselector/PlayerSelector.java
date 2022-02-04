@@ -1,14 +1,13 @@
 package com.williambl.legacybrigadier.api.argument.playerselector;
 
-import com.williambl.legacybrigadier.impl.server.mixinhooks.CommandSourceHooks;
-import com.williambl.legacybrigadier.impl.server.mixinhooks.ServerPlayerPacketHandlerHooks;
+import com.williambl.legacybrigadier.api.command.ExtendedSender;
+import com.williambl.legacybrigadier.impl.server.mixinhooks.ServerPlayPacketHandlerHooks;
 import com.williambl.legacybrigadier.impl.server.utils.UncheckedCaster;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.entity.player.Player;
 import net.minecraft.level.Level;
-import net.minecraft.server.command.CommandSource;
-import net.minecraft.server.network.ServerPlayerPacketHandler;
+import net.minecraft.server.network.ServerPlayPacketHandler;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,24 +41,24 @@ public class PlayerSelector {
     }
 
     /**
-     * Get the names of all players in the same level as the given {@link CommandSource}. If the CommandSource is levelless, all
+     * Get the names of all players in the same level as the given {@link ExtendedSender}. If the Sender is levelless, all
      * players in the server are retrieved.
-     * @param commandSource the {@link CommandSource} whose level will be used.
+     * @param commandSource the {@link ExtendedSender} whose level will be used.
      * @return the list of player names.
      */
-    public List<String> getPlayerNames(CommandSource commandSource) {
+    public List<String> getPlayerNames(ExtendedSender commandSource) {
         List<String> result = new ArrayList<>();
         switch (type) {
             case RAW:
                 result.add(selectorString);
                 break;
             case A:
-                Level level = ((CommandSourceHooks)commandSource).getWorld();
+                Level level = (commandSource).getWorld();
                 if (level != null) {
                     List<Player> players = UncheckedCaster.list(level.players);
                     players.forEach(it -> result.add(it.name));
                 } else {
-                    List<Player> players = UncheckedCaster.list(((CommandSourceHooks)commandSource).getServer().field_2842.players);
+                    List<Player> players = UncheckedCaster.list((commandSource).getServer().playerManager.players);
                     players.forEach(it -> result.add(it.name));
                 }
                 break;
@@ -71,19 +70,19 @@ public class PlayerSelector {
     }
 
     /**
-     * Get all players in the same level as the given {@link CommandSource}. If the CommandSource is levelless, all
+     * Get all players in the same level as the given {@link ExtendedSender}. If the Sender is levelless, all
      * players in the server are retrieved.
-     * @param commandSource the {@link CommandSource} whose level will be used.
+     * @param sender the {@link ExtendedSender} whose level will be used.
      * @return the list of players.
      */
-    public List<Player> getPlayers(CommandSource commandSource) {
+    public List<Player> getPlayers(ExtendedSender sender) {
         List<Player> result = new ArrayList<>();
-        Level level = ((CommandSourceHooks)commandSource).getWorld();
+        Level level = sender.getWorld();
         List<Player> players;
         if (level != null) {
             players = UncheckedCaster.list(level.players);
         } else {
-            players = UncheckedCaster.list(((CommandSourceHooks)commandSource).getServer().field_2842.players);
+            players = UncheckedCaster.list((sender).getServer().playerManager.players);
         }
         switch (type) {
             case RAW:
@@ -96,8 +95,8 @@ public class PlayerSelector {
                 result.addAll(players);
                 break;
             case P:
-                if (commandSource instanceof ServerPlayerPacketHandler)
-                    result.add(((ServerPlayerPacketHandlerHooks)commandSource).getPlayer());
+                if (sender.getPlayer() != null)
+                    result.add(sender.getPlayer());
                 break;
         }
         return result;

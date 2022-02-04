@@ -6,9 +6,9 @@ import com.mojang.brigadier.context.CommandContext;
 import com.williambl.legacybrigadier.api.argument.itemid.ItemId;
 import com.williambl.legacybrigadier.api.argument.playerselector.PlayerSelector;
 import com.williambl.legacybrigadier.api.command.CommandProvider;
+import com.williambl.legacybrigadier.api.command.ExtendedSender;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.server.command.CommandSource;
 
 import static com.mojang.brigadier.arguments.IntegerArgumentType.getInteger;
 import static com.mojang.brigadier.arguments.IntegerArgumentType.integer;
@@ -22,15 +22,15 @@ import static com.williambl.legacybrigadier.api.predicate.HasPermission.permissi
 public class GiveCommand implements CommandProvider {
 
     @Override
-    public LiteralArgumentBuilder<CommandSource> get() {
-        return LiteralArgumentBuilder.<CommandSource>literal("give")
+    public LiteralArgumentBuilder<ExtendedSender> get() {
+        return LiteralArgumentBuilder.<ExtendedSender>literal("give")
                 .requires(permission("command.give"))
-                .then(RequiredArgumentBuilder.<CommandSource, PlayerSelector>argument("player", player())
-                        .then(RequiredArgumentBuilder.<CommandSource, ItemId>argument("item", itemId())
+                .then(RequiredArgumentBuilder.<ExtendedSender, PlayerSelector>argument("player", player())
+                        .then(RequiredArgumentBuilder.<ExtendedSender, ItemId>argument("item", itemId())
                                 .executes(this::giveItem)
-                                .then(RequiredArgumentBuilder.<CommandSource, Integer>argument("count", integer(0, 64))
+                                .then(RequiredArgumentBuilder.<ExtendedSender, Integer>argument("count", integer(0, 64))
                                         .executes(this::giveItemWithCount)
-                                        .then(RequiredArgumentBuilder.<CommandSource, Integer>argument("meta", integer(0, 15))
+                                        .then(RequiredArgumentBuilder.<ExtendedSender, Integer>argument("meta", integer(0, 15))
                                                 .executes(this::giveItemWithCountAndMeta)
                                         )
                                 )
@@ -38,16 +38,16 @@ public class GiveCommand implements CommandProvider {
                 );
     }
 
-    public int giveItem(CommandContext<CommandSource> context) {
+    public int giveItem(CommandContext<ExtendedSender> context) {
         getPlayer(context, "player").getPlayers(context.getSource()).forEach(player -> {
             int item = getItemId(context, "item").getNumericId();
-            context.getSource().sendFeedback("Giving " + player.name + " some " + item);
+            context.getSource().sendCommandFeedback("Giving " + player.name + " some " + item);
             player.dropItem(item, 1, 0);
         });
         return 0;
     }
 
-    public int giveItemWithCount(CommandContext<CommandSource> context) {
+    public int giveItemWithCount(CommandContext<ExtendedSender> context) {
         getPlayer(context, "player").getPlayers(context.getSource()).forEach(player -> {
             int item = getItemId(context, "item").getNumericId();
             int count = getInteger(context, "count");
@@ -57,7 +57,7 @@ public class GiveCommand implements CommandProvider {
         return 0;
     }
 
-    public int giveItemWithCountAndMeta(CommandContext<CommandSource> context) {
+    public int giveItemWithCountAndMeta(CommandContext<ExtendedSender> context) {
         getPlayer(context, "player").getPlayers(context.getSource()).forEach(player -> {
             int item = getItemId(context, "item").getNumericId();
             int count = getInteger(context, "count");

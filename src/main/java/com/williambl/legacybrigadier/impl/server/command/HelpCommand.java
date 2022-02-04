@@ -4,10 +4,10 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.williambl.legacybrigadier.api.command.CommandProvider;
 import com.williambl.legacybrigadier.api.command.CommandRegistry;
+import com.williambl.legacybrigadier.api.command.ExtendedSender;
 import com.williambl.legacybrigadier.impl.server.LegacyBrigadierServer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.server.command.CommandSource;
 
 import static com.williambl.legacybrigadier.api.predicate.HasPermission.permission;
 
@@ -15,16 +15,16 @@ import static com.williambl.legacybrigadier.api.predicate.HasPermission.permissi
 public class HelpCommand implements CommandProvider {
 
     @Override
-    public LiteralArgumentBuilder<CommandSource> get() {
-        return LiteralArgumentBuilder.<CommandSource>literal("help")
+    public LiteralArgumentBuilder<ExtendedSender> get() {
+        return LiteralArgumentBuilder.<ExtendedSender>literal("help")
                 .requires(permission("command.help"))
                 .executes(this::showHelp);
     }
 
-    public int showHelp(CommandContext<CommandSource> context) {
+    public int showHelp(CommandContext<ExtendedSender> context) {
         LegacyBrigadierServer.dispatcher
                 .getSmartUsage(LegacyBrigadierServer.dispatcher.getRoot(), context.getSource())
-                .forEach((cmd, usage) -> context.getSource().sendFeedback(
+                .forEach((cmd, usage) -> context.getSource().sendCommandFeedback(
                         alignHelp(usage, CommandRegistry.getHelp(cmd))
                 ));
         return 0;

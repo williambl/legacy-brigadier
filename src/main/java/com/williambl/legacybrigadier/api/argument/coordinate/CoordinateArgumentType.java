@@ -41,6 +41,7 @@ public class CoordinateArgumentType implements ArgumentType<Coordinate> {
         return context.getArgument(name, Coordinate.class);
     }
 
+    @Override
     public Coordinate parse(StringReader stringReader) throws CommandSyntaxException {
         int cursor = stringReader.getCursor();
         Coordinate.CoordinatePart x = StringReaderUtils.readCoordinatePart(stringReader);
@@ -62,11 +63,13 @@ public class CoordinateArgumentType implements ArgumentType<Coordinate> {
     }
 
 
+    @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
         builder.suggest("~ ~ ~");
         return builder.buildFuture();
     }
 
+    @Override
     public Collection<String> getExamples() {
         return EXAMPLES;
     }
