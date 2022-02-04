@@ -4,7 +4,7 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.williambl.legacybrigadier.api.argument.itemid.ItemId;
-import com.williambl.legacybrigadier.api.argument.playerselector.PlayerSelector;
+import com.williambl.legacybrigadier.api.argument.playerselector.TargetSelector;
 import com.williambl.legacybrigadier.api.command.CommandProvider;
 import com.williambl.legacybrigadier.api.command.ExtendedSender;
 import net.fabricmc.api.EnvType;
@@ -14,8 +14,8 @@ import static com.mojang.brigadier.arguments.IntegerArgumentType.getInteger;
 import static com.mojang.brigadier.arguments.IntegerArgumentType.integer;
 import static com.williambl.legacybrigadier.api.argument.itemid.ItemIdArgumentType.getItemId;
 import static com.williambl.legacybrigadier.api.argument.itemid.ItemIdArgumentType.itemId;
-import static com.williambl.legacybrigadier.api.argument.playerselector.PlayerSelectorArgumentType.getPlayer;
-import static com.williambl.legacybrigadier.api.argument.playerselector.PlayerSelectorArgumentType.player;
+import static com.williambl.legacybrigadier.api.argument.playerselector.TargetSelectorArgumentType.getEntities;
+import static com.williambl.legacybrigadier.api.argument.playerselector.TargetSelectorArgumentType.entities;
 import static com.williambl.legacybrigadier.api.predicate.HasPermission.permission;
 
 @Environment(EnvType.SERVER)
@@ -25,7 +25,7 @@ public class GiveCommand implements CommandProvider {
     public LiteralArgumentBuilder<ExtendedSender> get() {
         return LiteralArgumentBuilder.<ExtendedSender>literal("give")
                 .requires(permission("command.give"))
-                .then(RequiredArgumentBuilder.<ExtendedSender, PlayerSelector>argument("player", player())
+                .then(RequiredArgumentBuilder.<ExtendedSender, TargetSelector>argument("player", entities())
                         .then(RequiredArgumentBuilder.<ExtendedSender, ItemId>argument("item", itemId())
                                 .executes(this::giveItem)
                                 .then(RequiredArgumentBuilder.<ExtendedSender, Integer>argument("count", integer(0, 64))
@@ -39,30 +39,30 @@ public class GiveCommand implements CommandProvider {
     }
 
     public int giveItem(CommandContext<ExtendedSender> context) {
-        getPlayer(context, "player").getPlayers(context.getSource()).forEach(player -> {
+        getEntities(context, "player").getEntities(context.getSource()).forEach(player -> {
             int item = getItemId(context, "item").getNumericId();
-            context.getSource().sendCommandFeedback("Giving " + player.name + " some " + item);
+            context.getSource().sendCommandFeedback("Giving " + player.toString() + " some " + item);
             player.dropItem(item, 1, 0);
         });
         return 0;
     }
 
     public int giveItemWithCount(CommandContext<ExtendedSender> context) {
-        getPlayer(context, "player").getPlayers(context.getSource()).forEach(player -> {
+        getEntities(context, "player").getEntities(context.getSource()).forEach(player -> {
             int item = getItemId(context, "item").getNumericId();
             int count = getInteger(context, "count");
-            sendFeedbackAndLog(context.getSource(), "Giving " + player.name + " " + count + " of " + item);
+            sendFeedbackAndLog(context.getSource(), "Giving " + player.toString() + " " + count + " of " + item);
             player.dropItem(item, count, 0);
         });
         return 0;
     }
 
     public int giveItemWithCountAndMeta(CommandContext<ExtendedSender> context) {
-        getPlayer(context, "player").getPlayers(context.getSource()).forEach(player -> {
+        getEntities(context, "player").getEntities(context.getSource()).forEach(player -> {
             int item = getItemId(context, "item").getNumericId();
             int count = getInteger(context, "count");
             int meta = getInteger(context, "meta");
-            sendFeedbackAndLog(context.getSource(), "Giving " + player.name + " " + count + " of " + item + ":" + meta);
+            sendFeedbackAndLog(context.getSource(), "Giving " + player.toString() + " " + count + " of " + item + ":" + meta);
             player.dropItem(item, count, meta);
         });
         return 0;

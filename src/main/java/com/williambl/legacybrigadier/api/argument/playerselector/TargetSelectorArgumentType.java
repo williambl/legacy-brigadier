@@ -22,8 +22,7 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 @Environment(EnvType.SERVER)
-public class PlayerSelectorArgumentType implements ArgumentType<PlayerSelector> {
-
+public class TargetSelectorArgumentType implements ArgumentType<TargetSelector> {
     private static final Collection<String> EXAMPLES = Arrays.asList("@a", "Notch", "@p");
 
     private static final SimpleCommandExceptionType NOT_VALID_ID = new SimpleCommandExceptionType(new LiteralMessage("Invalid Player"));
@@ -35,21 +34,22 @@ public class PlayerSelectorArgumentType implements ArgumentType<PlayerSelector> 
         players.forEach(it -> validValues.add(it.name));
         validValues.add("@a");
         validValues.add("@p");
+        validValues.add("@e");
         return validValues;
     }
 
-    public static PlayerSelectorArgumentType player() {
-        return new PlayerSelectorArgumentType();
+    public static TargetSelectorArgumentType entities() {
+        return new TargetSelectorArgumentType();
     }
 
-    public static PlayerSelector getPlayer(final CommandContext<?> context, final String name) {
-        return context.getArgument(name, PlayerSelector.class);
+    public static TargetSelector getEntities(final CommandContext<?> context, final String name) {
+        return context.getArgument(name, TargetSelector.class);
     }
 
     @Override
-    public PlayerSelector parse(StringReader reader) {
+    public TargetSelector parse(StringReader reader) {
         String selector = StringReaderUtils.readTargetSelector(reader);
-        return new PlayerSelector(selector);
+        return new TargetSelector(selector);
     }
 
     @Override

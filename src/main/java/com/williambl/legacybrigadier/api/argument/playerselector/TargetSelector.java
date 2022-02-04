@@ -5,19 +5,22 @@ import com.williambl.legacybrigadier.impl.server.mixinhooks.ServerPlayPacketHand
 import com.williambl.legacybrigadier.impl.server.utils.UncheckedCaster;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.Player;
 import net.minecraft.level.Level;
 import net.minecraft.server.network.ServerPlayPacketHandler;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Environment(EnvType.SERVER)
-public class PlayerSelector {
+public class TargetSelector {
     private final String selectorString;
     private final PlayerSelectorType type;
 
-    PlayerSelector(String selectorString) {
+    TargetSelector(String selectorString) {
         this.selectorString = selectorString;
         switch (selectorString.toLowerCase()) {
             case "@a":
@@ -25,6 +28,9 @@ public class PlayerSelector {
                 break;
             case "@p":
                 type = PlayerSelectorType.P;
+                break;
+            case "@e":
+                type = PlayerSelectorType.E;
                 break;
             default:
                 type = PlayerSelectorType.RAW;
@@ -46,13 +52,13 @@ public class PlayerSelector {
      * @param commandSource the {@link ExtendedSender} whose level will be used.
      * @return the list of player names.
      */
-    public List<String> getPlayerNames(ExtendedSender commandSource) {
+    public List<String> getEntityNames(ExtendedSender commandSource) {
         List<String> result = new ArrayList<>();
         switch (type) {
             case RAW:
                 result.add(selectorString);
                 break;
-            case A:
+            case A: {
                 Level level = (commandSource).getWorld();
                 if (level != null) {
                     List<Player> players = UncheckedCaster.list(level.players);
@@ -62,9 +68,20 @@ public class PlayerSelector {
                     players.forEach(it -> result.add(it.name));
                 }
                 break;
+            }
             case P:
                 result.add(commandSource.getName());
                 break;
+            case E: {
+                Level level = commandSource.getWorld();
+                List<Entity> entities;
+                if (level != null) {
+                    entities = UncheckedCaster.list(level.entities);
+                } else {
+                    entities = UncheckedCaster.list(Arrays.stream((commandSource).getServer().levels).flatMap(l -> UncheckedCaster.list(l.entities).stream()).collect(Collectors.toList()));
+                }
+                result.addAll(entities.stream().map(Object::toString).collect(Collectors.toList()));
+            }
         }
         return result;
     }
@@ -75,14 +92,17 @@ public class PlayerSelector {
      * @param sender the {@link ExtendedSender} whose level will be used.
      * @return the list of players.
      */
-    public List<Player> getPlayers(ExtendedSender sender) {
-        List<Player> result = new ArrayList<>();
+    public List<Entity> getEntities(ExtendedSender sender) {
+        List<Entity> result = new ArrayList<>();
         Level level = sender.getWorld();
         List<Player> players;
+        List<Entity> entities;
         if (level != null) {
             players = UncheckedCaster.list(level.players);
+            entities = UncheckedCaster.list(level.entities);
         } else {
             players = UncheckedCaster.list((sender).getServer().playerManager.players);
+            entities = UncheckedCaster.list(Arrays.stream((sender).getServer().levels).flatMap(l -> UncheckedCaster.list(l.entities).stream()).collect(Collectors.toList()));
         }
         switch (type) {
             case RAW:
@@ -98,6 +118,9 @@ public class PlayerSelector {
                 if (sender.getPlayer() != null)
                     result.add(sender.getPlayer());
                 break;
+            case E:
+                result.addAll(entities);
+                break;
         }
         return result;
     }
@@ -105,6 +128,7 @@ public class PlayerSelector {
     private enum PlayerSelectorType {
         RAW,
         A,
-        P
+        P,
+        E
     }
 }
