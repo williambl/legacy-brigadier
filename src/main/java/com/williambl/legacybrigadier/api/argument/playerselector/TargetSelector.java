@@ -107,6 +107,7 @@ public class TargetSelector<E extends Entity> implements Predicate<Entity> {
         NEAREST(sender ->
             Comparator.comparingDouble(e -> EntityUtils.distanceBetween(e, sender.getPosition()))
         ),
+        FURTHEST(sender -> NEAREST.getComparator(sender).reversed()),
         RANDOM(sender -> {
             int randomValue = sender.getWorld().rand.nextInt();
             return Comparator.<Entity>comparingInt(e -> e.hashCode()^randomValue)
