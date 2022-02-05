@@ -21,4 +21,8 @@ public final class EntityUtils {
         double var4 = (entity.z - pos.z);
         return MathsHelper.sqrt(var2 * var2 + var3 * var3 + var4 * var4);
     }
+
+    public static Vec3d getPosition(Entity entity) {
+        return Vec3d.getOrCreate(entity.x, entity.y, entity.z);
+    }
 }

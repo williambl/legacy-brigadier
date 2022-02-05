@@ -89,5 +89,8 @@ public class LegacyBrigadierServer implements DedicatedServerModInitializer {
 		CommandRegistry.register(
 				new PermissionsCommand(), "Query or add permissions to players."
 		);
+		CommandRegistry.register(
+				new TeleportCommand(), "Teleport entities"
+		);
 	}
 }
