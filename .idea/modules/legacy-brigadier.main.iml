@@ -6,6 +6,7 @@
         <autoDetectTypes>
           <platformType>MIXIN</platformType>
           <platformType>MCP</platformType>
+          <platformType>FABRIC</platformType>
         </autoDetectTypes>
       </configuration>
     </facet>

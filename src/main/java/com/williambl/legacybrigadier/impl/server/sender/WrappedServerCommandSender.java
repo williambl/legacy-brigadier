@@ -9,6 +9,7 @@ import com.williambl.legacybrigadier.impl.server.mixinhooks.ServerPlayPacketHand
 import io.github.minecraftcursedlegacy.impl.command.ServerCommandSender;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.Player;
 import net.minecraft.level.Level;
 import net.minecraft.server.MinecraftServer;
@@ -93,6 +94,11 @@ public class WrappedServerCommandSender implements ExtendedSender {
     @Override
     public boolean satisfiesNode(PermissionNode nodeToCheck) {
         return nodeToCheck.isSatisfiedBy(getPermissions());
+    }
+
+    @Override
+    public Entity getEntity() {
+        return this.getPlayer();
     }
 
     @Nullable
