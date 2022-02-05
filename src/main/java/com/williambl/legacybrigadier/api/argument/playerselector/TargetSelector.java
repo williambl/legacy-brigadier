@@ -9,6 +9,9 @@ import com.williambl.legacybrigadier.api.utils.EntityUtils;
 import com.williambl.legacybrigadier.impl.server.argument.SelfSelector;
 import com.williambl.legacybrigadier.impl.server.utils.StringReaderUtils;
 import com.williambl.legacybrigadier.impl.server.utils.UncheckedCaster;
+import io.github.minecraftcursedlegacy.api.registry.Id;
+import io.github.minecraftcursedlegacy.api.registry.Registries;
+import io.github.minecraftcursedlegacy.impl.registry.EntityType;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.entity.Entity;
@@ -23,6 +26,7 @@ import java.util.stream.Collectors;
 @Environment(EnvType.SERVER)
 public class TargetSelector<E extends Entity> implements Predicate<Entity> {
     private static final SimpleCommandExceptionType INVALID_TARGET_SELECTOR = new SimpleCommandExceptionType(new LiteralMessage("Invalid Target Selector"));
+    private static final SimpleCommandExceptionType INVALID_ENTITY_TYPE = new SimpleCommandExceptionType(new LiteralMessage("Invalid Entity Type"));
     private final Class<E> clazz;
     private final String name;
     private final int limit;
@@ -52,7 +56,7 @@ public class TargetSelector<E extends Entity> implements Predicate<Entity> {
                 return new TargetSelector<>(Player.class, options.name(), 1, SortingMethod.RANDOM);
             }
             case 'e': {
-                return new TargetSelector<>(Entity.class, options.name(), options.limit(), options.sort());
+                return new TargetSelector<>(options.clazz(), options.name(), options.limit(), options.sort());
             }
             case 's': {
                 return new SelfSelector();
@@ -142,6 +146,20 @@ public class TargetSelector<E extends Entity> implements Predicate<Entity> {
 
         private SortingMethod sort() {
             return this.getEnum("sort", SortingMethod.class, SortingMethod.RANDOM);
+        }
+
+        private Class<? extends Entity> clazz() throws CommandSyntaxException {
+            final String entityTypeName = this.getString("type", null);
+            if (entityTypeName == null) {
+                return Entity.class;
+            } else {
+                final EntityType entityType = Registries.ENTITY_TYPE.getById(new Id(entityTypeName));
+                if (entityType == null) {
+                    throw INVALID_ENTITY_TYPE.create();
+                }
+
+                return entityType.getClazz();
+            }
         }
 
         private int getInt(final String key, final int defaultValue) {
