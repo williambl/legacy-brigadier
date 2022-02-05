@@ -49,12 +49,12 @@ public final class StringReaderUtils {
         if (reader.peek() == '~') {
             type = Coordinate.CoordinateType.RELATIVE;
             reader.skip();
-            if (reader.peek() == ' ')
+            if (reader.peek() == ' ' || !reader.canRead())
                 return new Coordinate.CoordinatePart(0, type);
         } else if (reader.peek() == '^') {
             type = Coordinate.CoordinateType.LOCAL;
             reader.skip();
-            if (reader.peek() == ' ')
+            if (reader.peek() == ' ' || !reader.canRead())
                 return new Coordinate.CoordinatePart(0, type);
         }
 
