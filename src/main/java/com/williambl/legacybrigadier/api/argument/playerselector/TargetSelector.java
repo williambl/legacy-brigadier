@@ -1,11 +1,13 @@
 package com.williambl.legacybrigadier.api.argument.playerselector;
 
 import com.mojang.brigadier.LiteralMessage;
+import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.williambl.legacybrigadier.api.command.ExtendedSender;
 import com.williambl.legacybrigadier.api.utils.EntityUtils;
 import com.williambl.legacybrigadier.impl.server.argument.SelfSelector;
+import com.williambl.legacybrigadier.impl.server.utils.StringReaderUtils;
 import com.williambl.legacybrigadier.impl.server.utils.UncheckedCaster;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -13,9 +15,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.Player;
 import net.minecraft.level.Level;
 
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -39,19 +39,20 @@ public class TargetSelector<E extends Entity> implements Predicate<Entity> {
         return new TargetSelector<>(Entity.class, name, 1, SortingMethod.RANDOM);
     }
 
-    public static TargetSelector<?> create(char selectorType, String options) throws CommandSyntaxException {
+    public static TargetSelector<?> create(char selectorType, String optionsString) throws CommandSyntaxException {
+        final Options options = new Options(StringReaderUtils.readTargetSelectorOptions(new StringReader(optionsString)));
         switch (selectorType) {
             case 'a': {
-                return new TargetSelector<>(Player.class, null, Integer.MAX_VALUE, SortingMethod.RANDOM);
+                return new TargetSelector<>(Player.class, options.name(), options.limit(), options.sort());
             }
             case 'p': {
-                return new TargetSelector<>(Player.class, null, 1, SortingMethod.NEAREST);
+                return new TargetSelector<>(Player.class, options.name(), 1, SortingMethod.NEAREST);
             }
             case 'r': {
-                return new TargetSelector<>(Player.class, null, 1, SortingMethod.RANDOM);
+                return new TargetSelector<>(Player.class, options.name(), 1, SortingMethod.RANDOM);
             }
             case 'e': {
-                return new TargetSelector<>(Entity.class, null, Integer.MAX_VALUE, SortingMethod.RANDOM);
+                return new TargetSelector<>(Entity.class, options.name(), options.limit(), options.sort());
             }
             case 's': {
                 return new SelfSelector();
@@ -72,7 +73,7 @@ public class TargetSelector<E extends Entity> implements Predicate<Entity> {
 
     @Override
     public boolean test(Entity entity) {
-        return entity.getClass().isAssignableFrom(this.clazz) && (this.name == null || this.name.equals(EntityUtils.getName(entity)));
+        return this.clazz.isAssignableFrom(entity.getClass()) && (this.name == null || this.name.equals(EntityUtils.getName(entity)));
     }
 
     public List<E> getEntities(ExtendedSender sender) {
@@ -120,6 +121,63 @@ public class TargetSelector<E extends Entity> implements Predicate<Entity> {
 
         public Comparator<Entity> getComparator(ExtendedSender sender) {
             return implementation.apply(sender);
+        }
+    }
+
+    private static class Options {
+        private final Map<String, String> optionStrings;
+
+        private Options(final Map<String, String> optionStrings) {
+            this.optionStrings = optionStrings;
+        }
+
+        private String name() {
+            return this.getString("name", null);
+        }
+
+        private int limit() {
+            return this.getInt("limit", Integer.MAX_VALUE);
+        }
+
+        private SortingMethod sort() {
+            return this.getEnum("sort", SortingMethod.class, SortingMethod.RANDOM);
+        }
+
+        private int getInt(final String key, final int defaultValue) {
+            final String value = this.optionStrings.get(key);
+            if (value != null) {
+                return Integer.parseInt(value);
+            } else {
+                return defaultValue;
+            }
+        }
+
+        private double getDouble(final String key, final double defaultValue) {
+            final String value = this.optionStrings.get(key);
+            if (value != null) {
+                return Double.parseDouble(value);
+            } else {
+                return defaultValue;
+            }
+        }
+
+        private <E extends Enum<E>> E getEnum(final String key, final Class<E> clazz, final E defaultValue) {
+            final String value = this.optionStrings.get(key);
+            final E[] enumValues = clazz.getEnumConstants();
+
+            if (value != null) {
+                for (E element : enumValues) {
+                    if (element.name().equalsIgnoreCase(value)) {
+                        return element;
+                    }
+                }
+            }
+
+            return defaultValue;
+        }
+
+        private String getString(final String key, final String defaultValue) {
+            return this.optionStrings.getOrDefault(key, defaultValue);
         }
     }
 }
